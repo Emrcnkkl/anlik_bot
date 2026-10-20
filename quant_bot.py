@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import warnings
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 
 warnings.filterwarnings('ignore')
 
@@ -175,9 +175,10 @@ for hisse in bist30:
         pass
 
 veri_paketi = {
-    "guncellenme_tarihi": datetime.now().strftime("%d.%m.%Y %H:%M"),
+    "guncellenme_tarihi": (datetime.utcnow() + timedelta(hours=3)).strftime("%d.%m.%Y %H:%M"),
     "sinyaller": site_verileri
 }
+
 
 with open("signals.json", "w", encoding="utf-8") as f:
     json.dump(veri_paketi, f, ensure_ascii=False, indent=4)
