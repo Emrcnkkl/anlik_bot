@@ -1,0 +1,234 @@
+[
+  {
+    "hisse": "AKBNK",
+    "fiyat": 68.2,
+    "sinyal": "TUT",
+    "sebep": "Beklemede",
+    "rsi": 61.1,
+    "zaman": "21.10.2026 00:27"
+  },
+  {
+    "hisse": "ALARK",
+    "fiyat": 104.7,
+    "sinyal": "TUT",
+    "sebep": "Beklemede",
+    "rsi": 57.7,
+    "zaman": "21.10.2026 00:27"
+  },
+  {
+    "hisse": "ASELS",
+    "fiyat": 342.5,
+    "sinyal": "AL",
+    "sebep": "Hızlı EMA Kesimi",
+    "rsi": 59.9,
+    "zaman": "21.10.2026 00:27"
+  },
+  {
+    "hisse": "ASTOR",
+    "fiyat": 166.4,
+    "sinyal": "TUT",
+    "sebep": "Beklemede",
+    "rsi": 55.5,
+    "zaman": "21.10.2026 00:27"
+  },
+  {
+    "hisse": "BIMAS",
+    "fiyat": 385.25,
+    "sinyal": "TUT",
+    "sebep": "Beklemede",
+    "rsi": 72.5,
+    "zaman": "21.10.2026 00:27"
+  },
+  {
+    "hisse": "BRSAN",
+    "fiyat": 684.5,
+    "sinyal": "TUT",
+    "sebep": "Beklemede",
+    "rsi": 70.3,
+    "zaman": "21.10.2026 00:27"
+  },
+  {
+    "hisse": "CIMSA",
+    "fiyat": 40.34,
+    "sinyal": "SAT",
+    "sebep": "Aşırı Alım (RSI>80)",
+    "rsi": 87.6,
+    "zaman": "21.10.2026 00:27"
+  },
+  {
+    "hisse": "CWENE",
+    "fiyat": 16.24,
+    "sinyal": "TUT",
+    "sebep": "Beklemede",
+    "rsi": 40.9,
+    "zaman": "21.10.2026 00:27"
+  },
+  {
+    "hisse": "DOAS",
+    "fiyat": 136.1,
+    "sinyal": "TUT",
+    "sebep": "Beklemede",
+    "rsi": 43.8,
+    "zaman": "21.10.2026 00:27"
+  },
+  {
+    "hisse": "EKGYO",
+    "fiyat": 19.0,
+    "sinyal": "TUT",
+    "sebep": "Beklemede",
+    "rsi": 50.0,
+    "zaman": "21.10.2026 00:27"
+  },
+  {
+    "hisse": "ENKAI",
+    "fiyat": 77.45,
+    "sinyal": "TUT",
+    "sebep": "Beklemede",
+    "rsi": 59.1,
+    "zaman": "21.10.2026 00:27"
+  },
+  {
+    "hisse": "EREGL",
+    "fiyat": 37.16,
+    "sinyal": "TUT",
+    "sebep": "Beklemede",
+    "rsi": 76.0,
+    "zaman": "21.10.2026 00:27"
+  },
+  {
+    "hisse": "EUPWR",
+    "fiyat": 42.88,
+    "sinyal": "TUT",
+    "sebep": "Beklemede",
+    "rsi": 41.6,
+    "zaman": "21.10.2026 00:27"
+  },
+  {
+    "hisse": "FROTO",
+    "fiyat": 68.2,
+    "sinyal": "TUT",
+    "sebep": "Beklemede",
+    "rsi": 63.6,
+    "zaman": "21.10.2026 00:27"
+  },
+  {
+    "hisse": "GARAN",
+    "fiyat": 134.3,
+    "sinyal": "TUT",
+    "sebep": "Beklemede",
+    "rsi": 60.8,
+    "zaman": "21.10.2026 00:27"
+  },
+  {
+    "hisse": "GUBRF",
+    "fiyat": 372.25,
+    "sinyal": "TUT",
+    "sebep": "Beklemede",
+    "rsi": 54.3,
+    "zaman": "21.10.2026 00:27"
+  },
+  {
+    "hisse": "HEKTS",
+    "fiyat": 1.97,
+    "sinyal": "TUT",
+    "sebep": "Beklemede",
+    "rsi": 44.0,
+    "zaman": "21.10.2026 00:27"
+  },
+  {
+    "hisse": "ISCTR",
+    "fiyat": 13.06,
+    "sinyal": "AL",
+    "sebep": "Hızlı EMA Kesimi",
+    "rsi": 63.5,
+    "zaman": "21.10.2026 00:27"
+  },
+  {
+    "hisse": "KCHOL",
+    "fiyat": 207.6,
+    "sinyal": "AL",
+    "sebep": "Hızlı EMA Kesimi",
+    "rsi": 60.6,
+    "zaman": "21.10.2026 00:27"
+  },
+  {
+    "hisse": "KONTR",
+    "fiyat": 1.55,
+    "sinyal": "TUT",
+    "sebep": "Beklemede",
+    "rsi": 7.0,
+    "zaman": "21.10.2026 00:27"
+  },
+  {
+    "hisse": "KRDMD",
+    "fiyat": 42.8,
+    "sinyal": "TUT",
+    "sebep": "Beklemede",
+    "rsi": 66.3,
+    "zaman": "21.10.2026 00:27"
+  },
+  {
+    "hisse": "PGSUS",
+    "fiyat": 131.7,
+    "sinyal": "TUT",
+    "sebep": "Beklemede",
+    "rsi": 75.6,
+    "zaman": "21.10.2026 00:27"
+  },
+  {
+    "hisse": "SAHOL",
+    "fiyat": 89.05,
+    "sinyal": "TUT",
+    "sebep": "Beklemede",
+    "rsi": 76.2,
+    "zaman": "21.10.2026 00:27"
+  },
+  {
+    "hisse": "SASA",
+    "fiyat": 1.74,
+    "sinyal": "TUT",
+    "sebep": "Beklemede",
+    "rsi": 64.3,
+    "zaman": "21.10.2026 00:27"
+  },
+  {
+    "hisse": "SISE",
+    "fiyat": 36.24,
+    "sinyal": "TUT",
+    "sebep": "Beklemede",
+    "rsi": 69.8,
+    "zaman": "21.10.2026 00:27"
+  },
+  {
+    "hisse": "TCELL",
+    "fiyat": 97.5,
+    "sinyal": "AL",
+    "sebep": "Hızlı EMA Kesimi",
+    "rsi": 65.7,
+    "zaman": "21.10.2026 00:27"
+  },
+  {
+    "hisse": "THYAO",
+    "fiyat": 273.25,
+    "sinyal": "TUT",
+    "sebep": "Beklemede",
+    "rsi": 65.0,
+    "zaman": "21.10.2026 00:27"
+  },
+  {
+    "hisse": "TUPRS",
+    "fiyat": 360.5,
+    "sinyal": "TUT",
+    "sebep": "Beklemede",
+    "rsi": 35.0,
+    "zaman": "21.10.2026 00:27"
+  },
+  {
+    "hisse": "YKBNK",
+    "fiyat": 36.62,
+    "sinyal": "TUT",
+    "sebep": "Beklemede",
+    "rsi": 67.0,
+    "zaman": "21.10.2026 00:27"
+  }
+]
