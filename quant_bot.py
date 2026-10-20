@@ -1,8 +1,7 @@
 import yfinance as yf
 import pandas as pd
-import json
-from datetime import datetime
-import pytz
+import numpy as np
+import time
 
 BIST30 = [
     "AKBNK.IS", "ALARK.IS", "ASELS.IS", "ASTOR.IS", "BIMAS.IS",
@@ -13,84 +12,124 @@ BIST30 = [
     "TCELL.IS", "THYAO.IS", "TUPRS.IS", "YKBNK.IS"
 ]
 
-def hesapla_rsi(data, periyot=14):
-    delta = data.diff()
-    gain = (delta.where(delta > 0, 0)).rolling(window=periyot).mean()
-    loss = (-delta.where(delta < 0, 0)).rolling(window=periyot).mean()
-    rs = gain / loss
-    return 100 - (100 / (1 + rs))
+def hesapla_supertrend(df, period=10, multiplier=3):
+    hl2 = (df['High'] + df['Low']) / 2
+    tr1 = df['High'] - df['Low']
+    tr2 = (df['High'] - df['Close'].shift(1)).abs()
+    tr3 = (df['Low'] - df['Close'].shift(1)).abs()
+    tr = pd.concat([tr1, tr2, tr3], axis=1).max(axis=1)
+    atr = tr.rolling(period).mean()
+    
+    upperband = hl2 + (multiplier * atr)
+    lowerband = hl2 - (multiplier * atr)
+    
+    in_uptrend = np.full(len(df), True)
+    
+    # HATANIN ÇÖZÜLDÜĞÜ YER: .copy() eklendi
+    ub = upperband.values.copy()
+    lb = lowerband.values.copy()
+    close = df['Close'].values.copy()
+    
+    for i in range(period, len(df)):
+        if lb[i] < lb[i-1] and close[i-1] > lb[i-1]:
+            lb[i] = lb[i-1]
+        if ub[i] > ub[i-1] and close[i-1] < ub[i-1]:
+            ub[i] = ub[i-1]
+            
+        if close[i-1] <= ub[i-1] and close[i] > ub[i]:
+            in_uptrend[i] = True
+        elif close[i-1] >= lb[i-1] and close[i] < lb[i]:
+            in_uptrend[i] = False
+        else:
+            in_uptrend[i] = in_uptrend[i-1]
+            
+    df['In_Uptrend'] = in_uptrend
+    return df
 
-def hesapla_macd(data, hizli=12, yavas=26, sinyal_periyodu=9):
-    exp1 = data.ewm(span=hizli, adjust=False).mean()
-    exp2 = data.ewm(span=yavas, adjust=False).mean()
-    macd = exp1 - exp2
-    sinyal_cizgisi = macd.ewm(span=sinyal_periyodu, adjust=False).mean()
-    return macd, sinyal_cizgisi
+print("⏳ SUPERTREND KESKİN NİŞANCI BACKTESTİ (Günlük - Son 2 Yıllık Aktif İşlem)...")
+print("-" * 75)
+print(f"{'HİSSE':<12} | {'İŞLEM SAYISI':<15} | {'BAŞARI ORANI':<15} | {'AL & BEKLE':<12} | {'ALGORİTMA GETİRİSİ'}")
+print("-" * 75)
 
-print("⚡ Kısa Vadeli Taraması Başlıyor...")
-
-signals_data = []
-tz = pytz.timezone('Europe/Istanbul')
-simdi = datetime.now(tz).strftime("%d.%m.%Y %H:%M")
+toplam_algo = 0
+toplam_bh = 0
+gecerli_hisse = 0
+basarili_hisse = 0
 
 for hisse in BIST30:
     try:
-        # Son 60 günün "Saatlik" verisi
-        df = yf.download(hisse, period="60d", interval="1h", progress=False)
-        if df.empty or len(df) < 30:
+        time.sleep(0.5)
+        df = yf.download(hisse, period="3y", interval="1d", progress=False)
+        
+        if df.empty:
             continue
+        if len(df) < 250:
+            continue
+            
+        if isinstance(df.columns, pd.MultiIndex):
+            df.columns = df.columns.get_level_values(0)
 
-        kapanis = df['Close'].squeeze()
-        df['RSI'] = hesapla_rsi(kapanis)
-        df['MACD'], df['MACD_Signal'] = hesapla_macd(kapanis)
-        df['EMA9'] = kapanis.ewm(span=9, adjust=False).mean()
-        df['EMA21'] = kapanis.ewm(span=21, adjust=False).mean()
+        df['Close'] = pd.to_numeric(df['Close'].squeeze())
+        df['High'] = pd.to_numeric(df['High'].squeeze())
+        df['Low'] = pd.to_numeric(df['Low'].squeeze())
 
-        son_fiyat = float(kapanis.iloc[-1])
-        son_rsi = float(df['RSI'].iloc[-1])
+        df.dropna(subset=['Close', 'High', 'Low'], inplace=True)
         
-        onceki_macd = df['MACD'].iloc[-2]
-        son_macd = df['MACD'].iloc[-1]
-        onceki_macd_sig = df['MACD_Signal'].iloc[-2]
-        son_macd_sig = df['MACD_Signal'].iloc[-1]
+        df = hesapla_supertrend(df, period=10, multiplier=3)
+        df['EMA200'] = df['Close'].ewm(span=200, adjust=False).mean()
         
-        onceki_ema9 = df['EMA9'].iloc[-2]
-        son_ema9 = df['EMA9'].iloc[-1]
-        onceki_ema21 = df['EMA21'].iloc[-2]
-        son_ema21 = df['EMA21'].iloc[-1]
+        df['ST_Sinyal_AL'] = (df['In_Uptrend'] == True) & (df['In_Uptrend'].shift(1) == False)
+        df['ST_Sinyal_SAT'] = (df['In_Uptrend'] == False) & (df['In_Uptrend'].shift(1) == True)
 
-        # Strateji
-        ema_yukari = (onceki_ema9 <= onceki_ema21) and (son_ema9 > son_ema21)
-        macd_yukari = (onceki_macd <= onceki_macd_sig) and (son_macd > son_macd_sig)
+        df.dropna(inplace=True)
+
+        in_position = False
+        entry_price = 0
+        trades = []
+        algo_bakiye = 100.0
         
-        ema_asagi = (onceki_ema9 >= onceki_ema21) and (son_ema9 < son_ema21)
-        macd_asagi = (onceki_macd >= onceki_macd_sig) and (son_macd < son_macd_sig)
+        for index, row in df.iterrows():
+            if row['ST_Sinyal_AL'] and (row['Close'] > row['EMA200']):
+                if not in_position:
+                    in_position = True
+                    entry_price = row['Close']
+            
+            elif row['ST_Sinyal_SAT']:
+                if in_position:
+                    in_position = False
+                    exit_price = row['Close']
+                    profit_pct = (exit_price - entry_price) / entry_price
+                    trades.append(profit_pct)
+                    algo_bakiye *= (1 + profit_pct)
 
-        sinyal = "TUT"
-        sebep = "Beklemede"
+        if in_position:
+            exit_price = df['Close'].iloc[-1]
+            profit_pct = (exit_price - entry_price) / entry_price
+            trades.append(profit_pct)
+            algo_bakiye *= (1 + profit_pct)
 
-        if (ema_yukari or macd_yukari) and son_rsi < 70:
-            sinyal = "AL"
-            sebep = "Hızlı EMA Kesimi" if ema_yukari else "MACD Kesimi"
-        elif ema_asagi or macd_asagi or son_rsi > 80:
-            sinyal = "SAT"
-            sebep = "Aşırı Alım (RSI>80)" if son_rsi > 80 else ("EMA Kesimi" if ema_asagi else "MACD Kesimi")
+        total_trades = len(trades)
+        win_rate = (sum(1 for t in trades if t > 0) / total_trades * 100) if total_trades > 0 else 0
+        
+        algo_net = algo_bakiye - 100.0
+        ilk_fiyat = df['Close'].iloc[0]
+        son_fiyat = df['Close'].iloc[-1]
+        bh_net = ((son_fiyat - ilk_fiyat) / ilk_fiyat) * 100
 
-        # Veriyi site için listeye ekle
-        signals_data.append({
-            "hisse": hisse.replace('.IS', ''),
-            "fiyat": round(son_fiyat, 2),
-            "sinyal": sinyal,
-            "sebep": sebep,
-            "rsi": round(son_rsi, 1),
-            "zaman": simdi
-        })
+        toplam_algo += algo_net
+        toplam_bh += bh_net
+        gecerli_hisse += 1
+        if algo_net > bh_net:
+            basarili_hisse += 1
+
+        hisse_adi = hisse.replace('.IS', '')
+        print(f"{hisse_adi:<12} | {total_trades:<15} | %{win_rate:<14.1f} | %{bh_net:<11.1f} | %{algo_net:.1f}")
 
     except Exception as e:
-        print(f"Hata ({hisse}): {e}")
+        print(f"{hisse} Hata: {e}")
 
-# Web sitesinin okuyacağı JSON dosyasını oluştur
-with open("signals.json", "w", encoding="utf-8") as f:
-    json.dump(signals_data, f, ensure_ascii=False, indent=2)
-
-print("✅ signals.json dosyası site için başarıyla oluşturuldu!")
+print("-" * 75)
+if gecerli_hisse > 0:
+    print(f"BİST30 AL-BEKLE ORTALAMASI  : %{(toplam_bh / gecerli_hisse):.2f}")
+    print(f"ALGORİTMA (GÜNLÜK) ORTALAMASI: %{(toplam_algo / gecerli_hisse):.2f}")
+    print(f"ALGORİTMANIN YENDİĞİ HİSSE  : {basarili_hisse} / {gecerli_hisse}")
