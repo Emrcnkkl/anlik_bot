@@ -3,219 +3,319 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QuantBIST | Kantitatif Fon Radarı</title>
+    <title>QuantBIST | Modern Kantitatif Radar</title>
     
-    <!-- Bootstrap CSS -->
+    <!-- Bootstrap CSS (Sadece grid ve iskelet için) -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <!-- Google Fonts: Inter (Modern ve Temiz Tipografi) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
-        body {
-            background-color: #121212;
-            color: #ffffff;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            padding-top: 70px;
-        }
-        
-        .navbar-dark {
-            background-color: #1a1a1a !important;
-            border-bottom: 1px solid #333;
-        }
-        .navbar-brand {
-            font-weight: 800;
-            letter-spacing: 1px;
-            color: #0dcaf0 !important;
-        }
-        .nav-link {
-            font-weight: 500;
-            color: #adb5bd !important;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        .nav-link:hover, .nav-link.active {
-            color: #ffffff !important;
+        :root {
+            --bg-dark: #09090b;        /* Çok derin siyah/lacivert */
+            --surface: #121214;        /* Kart arkaplanı */
+            --border: #27272a;         /* İnce, zarif kenarlık */
+            --text-main: #f4f4f5;      /* Parlak beyaz */
+            --text-muted: #a1a1aa;     /* Göz yormayan gri */
+            --accent: #3b82f6;         /* Modern teknoloji mavisi */
+            --green: #10b981;          /* Canlı ve yumuşak yeşil */
+            --red: #ef4444;            /* Soft kırmızı */
         }
 
-        .header-title { color: #f8f9fa; font-weight: 700; margin-top: 20px; }
-        .header-subtitle { color: #adb5bd; font-size: 1.1rem; margin-bottom: 20px; }
-        .section-panel { display: none; animation: fadeIn 0.4s; }
-        .section-panel.active { display: block; }
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            padding-top: 80px;
+            -webkit-font-smoothing: antialiased;
+        }
         
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+        /* Camsı (Glassmorphism) Navbar */
+        .navbar {
+            background-color: rgba(9, 9, 11, 0.8) !important;
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+        }
+        .navbar-brand {
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: var(--text-main) !important;
+        }
+        .navbar-brand span { color: var(--accent); }
+        .nav-link {
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: var(--text-muted) !important;
+            transition: all 0.2s ease;
+            margin-left: 15px;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: var(--text-main) !important;
+        }
+
+        /* Başlıklar ve Metinler */
+        .header-title { 
+            font-weight: 700; 
+            letter-spacing: -1px; 
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        .header-subtitle { 
+            color: var(--text-muted); 
+            font-size: 1.1rem; 
+            font-weight: 400;
+        }
+
+        /* Canlı Güncelleme Rozeti */
+        .live-status {
+            display: inline-flex;
+            align-items: center;
+            background-color: var(--surface);
+            border: 1px solid var(--border);
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 40px;
+            margin-top: 15px;
+        }
+        .pulse-dot {
+            width: 8px; height: 8px;
+            background-color: var(--green);
+            border-radius: 50%;
+            margin-right: 10px;
+            box-shadow: 0 0 10px var(--green);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+            70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        /* Sekme Geçiş Animasyonları */
+        .section-panel { display: none; animation: fadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+        .section-panel.active { display: block; }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .update-badge {
-            background-color: #343a40; padding: 8px 15px; border-radius: 20px;
-            font-size: 0.9rem; color: #0dcaf0; display: inline-block;
-            margin-bottom: 25px; border: 1px solid #495057;
+        /* Özel Premium Tablo Tasarımı */
+        .table-container {
+            background-color: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
         }
-        .table { color: #e9ecef; border-color: #343a40; }
-        .table-dark { background-color: #1e1e1e; }
-        .table thead th {
-            border-bottom: 2px solid #495057; color: #adb5bd;
-            font-weight: 600; text-transform: uppercase; font-size: 0.85rem;
+        .custom-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
         }
-        .table tbody tr:hover { background-color: #2b2b2b; }
-        
-        .text-al { color: #28a745 !important; font-weight: bold; }
-        .text-sat { color: #dc3545 !important; font-weight: bold; }
-        .text-tut { color: #6c757d !important; font-weight: bold; }
-        .text-profit { color: #28a745 !important; font-weight: bold; }
-        .text-loss { color: #dc3545 !important; font-weight: bold; }
-
-        .info-card {
-            background-color: #1e1e1e;
-            border: 1px solid #333;
-            border-radius: 10px;
-            padding: 25px;
-            margin-bottom: 20px;
-            height: 100%;
+        .custom-table th {
+            background-color: rgba(255,255,255,0.02);
+            color: var(--text-muted);
+            font-weight: 500;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
         }
-        .info-icon { font-size: 2rem; color: #0dcaf0; margin-bottom: 15px; }
-        
-        /* Yazıların okunaklı olması için eklenen özel sınıf */
-        .info-text {
-            color: #d1d5db; 
-            line-height: 1.6;
+        .custom-table td {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
             font-size: 0.95rem;
+            vertical-align: middle;
+            color: var(--text-main);
         }
+        .custom-table tbody tr:last-child td { border-bottom: none; }
+        .custom-table tbody tr:hover { background-color: rgba(255,255,255,0.02); }
+
+        /* Rozetler ve Yazı Renkleri */
+        .strategy-badge {
+            background-color: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-muted);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-family: monospace;
+        }
+        .font-mono { font-family: 'Courier New', Courier, monospace; font-size: 0.95rem; }
         
-        .profile-section {
-            background-color: #1e1e1e;
-            border: 1px solid #333;
-            border-radius: 15px;
-            padding: 40px;
-            max-width: 700px;
-            margin: 0 auto;
-            text-align: center;
+        /* Modern Bilgi Kartları */
+        .info-card {
+            background-color: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 30px;
+            height: 100%;
+            transition: transform 0.2s ease;
         }
-        .contact-btn { margin: 5px; width: 200px; }
+        .info-card:hover { transform: translateY(-5px); border-color: #3f3f46; }
+        .info-icon { font-size: 1.8rem; color: var(--text-main); margin-bottom: 20px; }
+        .info-card h4 { font-weight: 600; font-size: 1.2rem; margin-bottom: 15px; }
+        .info-card p { color: var(--text-muted); line-height: 1.6; font-size: 0.95rem; margin: 0; }
+
+        /* İletişim Kartı */
+        .profile-card {
+            background-color: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 50px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .social-btn {
+            background-color: transparent;
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+            margin: 5px;
+        }
+        .social-btn:hover {
+            background-color: var(--text-main);
+            color: var(--bg-dark);
+        }
     </style>
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg fixed-top">
     <div class="container">
-        <a class="navbar-brand" href="#" onclick="switchTab('radar')"><i class="bi bi-activity"></i> QuantBIST</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
+        <a class="navbar-brand" href="#" onclick="switchTab('radar')">
+            <i class="bi bi-layers-half me-2" style="color: var(--accent);"></i>Quant<span>BIST</span>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" style="border: none; color: white;">
+            <i class="bi bi-list fs-2"></i>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
-                    <a class="nav-link active" id="nav-radar" onclick="switchTab('radar')"><i class="bi bi-display"></i> Canlı Radar</a>
+                    <a class="nav-link active" id="nav-radar" onclick="switchTab('radar')">Canlı Radar</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" id="nav-about" onclick="switchTab('about')"><i class="bi bi-cpu"></i> Sistem Hakkında</a>
+                    <a class="nav-link" id="nav-about" onclick="switchTab('about')">Mimari</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" id="nav-contact" onclick="switchTab('contact')"><i class="bi bi-person-lines-fill"></i> İletişim</a>
+                    <a class="nav-link" id="nav-contact" onclick="switchTab('contact')">İletişim</a>
                 </li>
             </ul>
         </div>
     </div>
 </nav>
 
-<div class="container mt-4">
+<div class="container mt-4 mb-5">
 
+    <!-- 1. BÖLÜM: CANLI RADAR -->
     <div id="radar" class="section-panel active">
         <div class="text-center">
-            <h1 class="header-title">BİST30 Kantitatif Fon Radarı</h1>
-            <p class="header-subtitle">Otonom Trend Takip ve Optimizasyon Sistemi</p>
-            <div class="update-badge" id="lastUpdate">
-                Son Güncelleme: Yükleniyor...
+            <h1 class="header-title">Otonom Fon Radarı</h1>
+            <p class="header-subtitle">Makro trend takip ve optimizasyon motoru.</p>
+            <div class="live-status">
+                <div class="pulse-dot"></div>
+                <span id="lastUpdate">Ağ bağlantısı bekleniyor...</span>
             </div>
         </div>
 
-        <div class="table-responsive shadow-lg rounded mb-5">
-            <table class="table table-dark table-hover mb-0 text-center">
-                <thead>
-                    <tr>
-                        <th class="text-start ps-4">HİSSE</th>
-                        <th>GÜNLÜK SİNYAL</th>
-                        <th>ANLIK FİYAT</th>
-                        <th>ŞAMPİYON STRATEJİ</th>
-                        <th>ÇIKIŞ STRATEJİSİ</th>
-                        <th>TARİHSEL GETİRİ</th>
-                    </tr>
-                </thead>
-                <tbody id="signalTableBody">
-                    <tr>
-                        <td colspan="6" style="padding: 40px; color: #adb5bd;">
-                            <div class="spinner-border spinner-border-sm text-secondary me-2" role="status"></div>
-                            Yapay zeka verileri getiriliyor...
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        
-        <div class="text-center mt-4 mb-5" style="color: #adb5bd; font-size: 0.85rem;">
-            * Bu sayfadaki veriler tamamen algoritmik backtest sonuçlarıdır, yatırım tavsiyesi değildir.<br>
-            * Sistem EMA 200 filtresi ve PPF (Para Piyasası Fonu) entegrasyonu ile çalışmaktadır.
+        <div class="table-container">
+            <div class="table-responsive">
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th style="padding-left: 30px;">Varlık</th>
+                            <th>Günlük Sinyal</th>
+                            <th>Anlık Fiyat</th>
+                            <th>Algoritma Zekası</th>
+                            <th>Çıkış Planı</th>
+                            <th class="text-end" style="padding-right: 30px;">Algoritmik Getiri</th>
+                        </tr>
+                    </thead>
+                    <tbody id="signalTableBody">
+                        <tr>
+                            <td colspan="6" class="text-center py-5">
+                                <div class="spinner-border spinner-border-sm text-secondary me-2" role="status"></div>
+                                <span style="color: var(--text-muted);">Sinyaller yükleniyor...</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
+    <!-- 2. BÖLÜM: MİMARİ -->
     <div id="about" class="section-panel">
         <div class="text-center mb-5">
-            <h2 class="header-title">Algoritma Nasıl Çalışır?</h2>
-            <p class="header-subtitle" style="color: #d1d5db;">İnsani duyguları devreden çıkaran 3 katmanlı güvenlik mimarisi.</p>
+            <h2 class="header-title">Sistem Mimarisi</h2>
+            <p class="header-subtitle">Duyguları devreden çıkaran 3 katmanlı algoritmik yapı.</p>
         </div>
 
-        <div class="row">
+        <div class="row g-4">
             <div class="col-md-4">
                 <div class="info-card">
                     <i class="bi bi-shield-check info-icon"></i>
-                    <h4>1. Ayı Piyasası Koruması</h4>
-                    <p class="info-text">Sistem, fiyat 200 Günlük Üstel Hareketli Ortalamanın (EMA 200) altındayken hiçbir alım sinyalini onaylamaz. Düşen bıçakları tutmayı engeller ve sermayeyi çöküşlerden korur.</p>
+                    <h4>Ayı Piyasası Koruması</h4>
+                    <p>Fiyat 200 Günlük Üstel Hareketli Ortalamanın (EMA 200) altındayken hiçbir alım sinyali onaylanmaz. Düşen varlıklarda sermaye çöküşten korunur.</p>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="info-card">
-                    <i class="bi bi-graph-up-arrow info-icon"></i>
-                    <h4>2. Dinamik Trend Sürme</h4>
-                    <p class="info-text">Dar izleyen stoplar veya erken kâr alımları yoktur. Sistem; MACD, SuperTrend ve EMA Kesişimlerini hisse bazlı optimize eder ve trend tamamen bitene kadar pozisyonu taşır.</p>
+                    <i class="bi bi-graph-up info-icon"></i>
+                    <h4>Dinamik Trend Sürme</h4>
+                    <p>Erken kâr alımları veya dar stoplar kullanılmaz. Sistem; MACD, SuperTrend ve EMA kesişimlerini optimize eder ve trend bitene kadar pozisyonda kalır.</p>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="info-card">
-                    <i class="bi bi-bank info-icon"></i>
-                    <h4>3. PPF Nakit Yönetimi</h4>
-                    <p class="info-text">Algoritma hissede olmadığı dönemlerde nakitte boş beklemez. Açıkta kalan bakiye otonom olarak Para Piyasası Fonlarında (PPF) gecelik faizle değerlendirilerek enflasyona karşı korunur.</p>
+                    <i class="bi bi-wallet2 info-icon"></i>
+                    <h4>PPF Nakit Entegrasyonu</h4>
+                    <p>Riskli varlıklardan çıkıldığında nakit boşta beklemez. Algoritma, açıkta kalan bakiyeyi otonom olarak Para Piyasası Fonlarında (PPF) değerlendirir.</p>
                 </div>
             </div>
         </div>
         
-        <div class="info-card mt-3 mb-5">
-            <i class="bi bi-gear-wide-connected info-icon"></i>
-            <h4>Otonom Grid Search (Makine Öğrenmesi)</h4>
-            <p class="info-text mb-0">Borsa İstanbul'daki her hissenin farklı bir karakteri (volatilite DNA'sı) vardır. Sistem her akşam piyasa kapandığında BİST30'daki 30 hisseyi binlerce farklı indikatör kombinasyonuyla (Grid Search) geriye dönük test eder. Bir hissede MACD daha kârlı sonuç verirken, diğerinde SuperTrend öne çıkabilir. Radar ekranında gördüğünüz sinyaller, her hissenin kendi DNA'sına en uygun olan "Şampiyon" stratejinin anlık kararıdır.</p>
+        <div class="info-card mt-4">
+            <div class="d-flex align-items-center mb-3">
+                <i class="bi bi-cpu info-icon mb-0 me-3"></i>
+                <h4 class="mb-0">Makine Öğrenmesi & Grid Search</h4>
+            </div>
+            <p>Her varlığın farklı bir fiyatlama DNA'sı vardır. Otonom sistem, her akşam piyasa kapandıktan sonra varlıkları binlerce farklı indikatör kombinasyonuyla (Grid Search) geriye dönük test eder. Ekranda görülen veriler, o varlığın matematiksel olarak en kârlı olduğu "Şampiyon" stratejinin anlık sinyalidir.</p>
         </div>
     </div>
 
+    <!-- 3. BÖLÜM: İLETİŞİM -->
     <div id="contact" class="section-panel">
-        <div class="profile-section mt-4 mb-5">
-            <h2 class="mb-1" style="color: #0dcaf0; font-weight: 700;">Emir Çanakkale</h2>
-            <p class="mb-4" style="color: #d1d5db; font-size: 1.1rem;">
-                Boğaziçi Üniversitesi - Bilgisayar Mühendisliği
+        <div class="profile-card text-center mt-4">
+            <h2 class="mb-1" style="font-weight: 700;">Emir Çanakkale</h2>
+            <p style="color: var(--text-muted); font-size: 1.1rem; margin-bottom: 30px;">
+                Boğaziçi Üniversitesi – Bilgisayar Mühendisliği
             </p>
             
-            <div class="mb-4 text-start d-inline-block info-text" style="max-width: 500px;">
-                <p>Bu proje, geleneksel hisse senedi yatırımlarını veri bilimi ve otomasyonla birleştirerek insan psikolojisinden bağımsız, istikrarlı bir getiri modeli oluşturmak amacıyla geliştirilmiştir.</p>
-            </div>
+            <p style="color: var(--text-muted); line-height: 1.7; margin-bottom: 40px; text-align: left;">
+                Bu altyapı, geleneksel hisse senedi yatırımlarını veri bilimi ve CI/CD otomasyonu (GitHub Actions) ile birleştirerek, insan psikolojisinden bağımsız, istikrarlı bir getiri modeli oluşturmak amacıyla geliştirilmiştir.
+            </p>
             
-            <div>
-                <a href="https://www.linkedin.com/in/emir-çanakkale" target="_blank" class="btn btn-outline-info contact-btn">
+            <div class="d-flex justify-content-center flex-wrap gap-2">
+                <a href="https://linkedin.com/in/senin-adresin" target="_blank" class="social-btn">
                     <i class="bi bi-linkedin me-2"></i> LinkedIn
                 </a>
-                <a href="https://github.com/Emrcnkkl" target="_blank" class="btn btn-outline-light contact-btn">
+                <a href="https://github.com/Emrcnkkl" target="_blank" class="social-btn">
                     <i class="bi bi-github me-2"></i> GitHub
                 </a>
-                <a href="mailto:canakkaleemir59@gmail.com" class="btn btn-outline-primary contact-btn mt-2">
-                    <i class="bi bi-envelope-fill me-2"></i> E-Posta Gönder
+                <a href="mailto:senin.emailin@example.com" class="social-btn">
+                    <i class="bi bi-envelope me-2"></i> İletişim
                 </a>
             </div>
         </div>
@@ -223,9 +323,12 @@
 
 </div>
 
+<!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
+<!-- Uygulama JS -->
 <script>
+    // Menü Geçiş Kontrolü
     function switchTab(tabId) {
         document.querySelectorAll('.section-panel').forEach(panel => {
             panel.classList.remove('active');
@@ -238,34 +341,44 @@
         document.getElementById('nav-' + tabId).classList.add('active');
     }
 
+    // Veri Çekme ve Tablo Oluşturma
     async function loadLiveSignals() {
         try {
             const response = await fetch('signals.json');
-            if (!response.ok) throw new Error("JSON dosyası bulunamadı.");
+            if (!response.ok) throw new Error("Veri bulunamadı.");
             
             const data = await response.json();
             
             const updateElement = document.getElementById('lastUpdate');
-            if (updateElement) updateElement.innerText = "Son Güncelleme: " + data.guncellenme_tarihi;
+            if (updateElement) updateElement.innerText = "Son Senkronizasyon: " + data.guncellenme_tarihi;
             
             const tbody = document.getElementById('signalTableBody');
             tbody.innerHTML = ""; 
             
             data.sinyaller.forEach(item => {
-                let sinyalClass = "";
-                if (item.sinyal === "AL") sinyalClass = "text-al";
-                else if (item.sinyal === "SAT") sinyalClass = "text-sat";
-                else sinyalClass = "text-tut";
+                
+                // Sinyal İkonları ve Renkleri
+                let signalHtml = "";
+                if (item.sinyal === "AL") {
+                    signalHtml = `<span style="color: var(--green); font-weight: 600;"><i class="bi bi-arrow-up-right-circle-fill me-1"></i> AL</span>`;
+                } else if (item.sinyal === "SAT") {
+                    signalHtml = `<span style="color: var(--red); font-weight: 600;"><i class="bi bi-arrow-down-right-circle-fill me-1"></i> SAT</span>`;
+                } else {
+                    signalHtml = `<span style="color: var(--text-muted); font-weight: 500;"><i class="bi bi-dash-circle me-1"></i> TUT</span>`;
+                }
 
-                let getiriClass = item.getiri > 0 ? "text-profit" : "text-loss";
+                // Getiri Renklendirmesi ve Formatı
+                let getiriHtml = item.getiri > 0 
+                    ? `<span style="color: var(--green); font-weight: 600;">+%${item.getiri}</span>` 
+                    : `<span style="color: var(--red); font-weight: 600;">%${item.getiri}</span>`;
 
                 const row = `<tr>
-                    <td class="text-start ps-4"><b>${item.hisse}</b></td>
-                    <td class="${sinyalClass}">${item.sinyal}</td>
-                    <td>${item.fiyat} ₺</td>
-                    <td><span class="badge bg-secondary">${item.strateji}</span></td>
-                    <td style="color: #adb5bd; font-size: 0.85rem;">${item.stop}</td>
-                    <td class="${getiriClass}">%${item.getiri}</td>
+                    <td style="padding-left: 30px; font-weight: 600;">${item.hisse}</td>
+                    <td>${signalHtml}</td>
+                    <td class="font-mono">${item.fiyat} ₺</td>
+                    <td><span class="strategy-badge">${item.strateji}</span></td>
+                    <td style="color: var(--text-muted); font-size: 0.85rem;">${item.stop}</td>
+                    <td class="text-end" style="padding-right: 30px;">${getiriHtml}</td>
                 </tr>`;
                 
                 tbody.innerHTML += row;
@@ -273,9 +386,9 @@
         } catch (error) {
             document.getElementById('signalTableBody').innerHTML = 
                 `<tr>
-                    <td colspan="6" style="color:#dc3545; padding: 30px;">
-                        <b>Sinyaller şu an yüklenemiyor.</b><br>
-                        <span style="color:#adb5bd; font-size: 0.85rem;">Botun arka planda çalışıp verileri güncellemesi bekleniyor.</span>
+                    <td colspan="6" class="text-center py-4" style="color: var(--text-muted);">
+                        <i class="bi bi-cloud-slash fs-3 d-block mb-2"></i>
+                        Sinyaller şu an yüklenemiyor, veri bekleniyor.
                     </td>
                 </tr>`;
         }
