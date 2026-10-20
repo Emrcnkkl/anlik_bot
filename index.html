@@ -5,23 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QuantBIST | Modern Kantitatif Radar</title>
     
-    <!-- Bootstrap CSS (Sadece grid ve iskelet için) -->
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <!-- Google Fonts: Inter (Modern ve Temiz Tipografi) -->
+    <!-- Google Fonts: Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --bg-dark: #09090b;        /* Çok derin siyah/lacivert */
-            --surface: #121214;        /* Kart arkaplanı */
-            --border: #27272a;         /* İnce, zarif kenarlık */
-            --text-main: #f4f4f5;      /* Parlak beyaz */
-            --text-muted: #a1a1aa;     /* Göz yormayan gri */
-            --accent: #3b82f6;         /* Modern teknoloji mavisi */
-            --green: #10b981;          /* Canlı ve yumuşak yeşil */
-            --red: #ef4444;            /* Soft kırmızı */
+            --bg-dark: #09090b;
+            --surface: #121214;
+            --border: #27272a;
+            --text-main: #f4f4f5;
+            --text-muted: #a1a1aa;
+            --accent: #3b82f6;
+            --green: #10b981;
+            --red: #ef4444;
         }
 
         body {
@@ -32,7 +32,6 @@
             -webkit-font-smoothing: antialiased;
         }
         
-        /* Camsı (Glassmorphism) Navbar */
         .navbar {
             background-color: rgba(9, 9, 11, 0.8) !important;
             backdrop-filter: blur(12px);
@@ -48,6 +47,7 @@
             font-weight: 500;
             font-size: 0.9rem;
             color: var(--text-muted) !important;
+            cursor: pointer;
             transition: all 0.2s ease;
             margin-left: 15px;
         }
@@ -55,39 +55,17 @@
             color: var(--text-main) !important;
         }
 
-        /* Başlıklar ve Metinler */
-        .header-title { 
-            font-weight: 700; 
-            letter-spacing: -1px; 
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-        }
-        .header-subtitle { 
-            color: var(--text-muted); 
-            font-size: 1.1rem; 
-            font-weight: 400;
-        }
+        .header-title { font-weight: 700; letter-spacing: -1px; font-size: 2.5rem; margin-bottom: 10px; }
+        .header-subtitle { color: var(--text-muted); font-size: 1.1rem; font-weight: 400; }
 
-        /* Canlı Güncelleme Rozeti */
         .live-status {
-            display: inline-flex;
-            align-items: center;
-            background-color: var(--surface);
-            border: 1px solid var(--border);
-            padding: 6px 16px;
-            border-radius: 30px;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            margin-bottom: 40px;
-            margin-top: 15px;
+            display: inline-flex; align-items: center; background-color: var(--surface);
+            border: 1px solid var(--border); padding: 6px 16px; border-radius: 30px;
+            font-size: 0.85rem; color: var(--text-muted); margin-bottom: 40px; margin-top: 15px;
         }
         .pulse-dot {
-            width: 8px; height: 8px;
-            background-color: var(--green);
-            border-radius: 50%;
-            margin-right: 10px;
-            box-shadow: 0 0 10px var(--green);
-            animation: pulse 2s infinite;
+            width: 8px; height: 8px; background-color: var(--green); border-radius: 50%;
+            margin-right: 10px; box-shadow: 0 0 10px var(--green); animation: pulse 2s infinite;
         }
         @keyframes pulse {
             0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
@@ -95,7 +73,6 @@
             100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
         }
 
-        /* Sekme Geçiş Animasyonları */
         .section-panel { display: none; animation: fadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
         .section-panel.active { display: block; }
         @keyframes fadeUp {
@@ -103,98 +80,66 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Özel Premium Tablo Tasarımı */
         .table-container {
-            background-color: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+            background-color: var(--surface); border: 1px solid var(--border);
+            border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.2);
         }
-        .custom-table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-        }
+        .custom-table { width: 100%; border-collapse: collapse; text-align: left; }
         .custom-table th {
-            background-color: rgba(255,255,255,0.02);
-            color: var(--text-muted);
-            font-weight: 500;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            padding: 16px 24px;
-            border-bottom: 1px solid var(--border);
+            background-color: rgba(255,255,255,0.02); color: var(--text-muted);
+            font-weight: 500; font-size: 0.75rem; text-transform: uppercase;
+            letter-spacing: 0.1em; padding: 16px 24px; border-bottom: 1px solid var(--border);
         }
         .custom-table td {
-            padding: 16px 24px;
-            border-bottom: 1px solid var(--border);
-            font-size: 0.95rem;
-            vertical-align: middle;
-            color: var(--text-main);
+            padding: 16px 24px; border-bottom: 1px solid var(--border); font-size: 0.95rem;
+            vertical-align: middle; color: var(--text-main);
         }
-        .custom-table tbody tr:last-child td { border-bottom: none; }
         .custom-table tbody tr:hover { background-color: rgba(255,255,255,0.02); }
 
-        /* Rozetler ve Yazı Renkleri */
         .strategy-badge {
-            background-color: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: var(--text-muted);
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            font-family: monospace;
+            background-color: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-muted); padding: 4px 10px; border-radius: 6px;
+            font-size: 0.8rem; font-family: monospace;
         }
         .font-mono { font-family: 'Courier New', Courier, monospace; font-size: 0.95rem; }
         
-        /* Modern Bilgi Kartları */
         .info-card {
-            background-color: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 30px;
-            height: 100%;
-            transition: transform 0.2s ease;
+            background-color: var(--surface); border: 1px solid var(--border);
+            border-radius: 16px; padding: 30px; height: 100%; transition: transform 0.2s ease;
         }
         .info-card:hover { transform: translateY(-5px); border-color: #3f3f46; }
         .info-icon { font-size: 1.8rem; color: var(--text-main); margin-bottom: 20px; }
         .info-card h4 { font-weight: 600; font-size: 1.2rem; margin-bottom: 15px; }
         .info-card p { color: var(--text-muted); line-height: 1.6; font-size: 0.95rem; margin: 0; }
 
-        /* İletişim Kartı */
+        /* Performans Kartları İçin Özel Tasarım */
+        .stat-box {
+            background-color: rgba(255,255,255,0.02); border: 1px solid var(--border);
+            border-radius: 12px; padding: 15px; margin-bottom: 15px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .stat-label { color: var(--text-muted); font-size: 0.9rem; font-weight: 500; }
+        .stat-value { font-size: 1.1rem; font-weight: 700; font-family: monospace; }
+        .stat-win { color: var(--green); }
+        .stat-loss { color: var(--red); }
+        
         .profile-card {
-            background-color: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 50px;
-            max-width: 600px;
-            margin: 0 auto;
+            background-color: var(--surface); border: 1px solid var(--border);
+            border-radius: 20px; padding: 50px; max-width: 600px; margin: 0 auto;
         }
         .social-btn {
-            background-color: transparent;
-            color: var(--text-main);
-            border: 1px solid var(--border);
-            padding: 10px 24px;
-            border-radius: 8px;
-            font-weight: 500;
-            transition: all 0.2s ease;
-            text-decoration: none;
-            display: inline-block;
-            margin: 5px;
+            background-color: transparent; color: var(--text-main); border: 1px solid var(--border);
+            padding: 10px 24px; border-radius: 8px; font-weight: 500; transition: all 0.2s ease;
+            text-decoration: none; display: inline-block; margin: 5px;
         }
-        .social-btn:hover {
-            background-color: var(--text-main);
-            color: var(--bg-dark);
-        }
+        .social-btn:hover { background-color: var(--text-main); color: var(--bg-dark); }
     </style>
 </head>
 <body>
 
-<!-- NAVBAR -->
 <nav class="navbar navbar-expand-lg fixed-top">
     <div class="container">
-        <a class="navbar-brand" href="#" onclick="switchTab('radar')">
+        <a class="navbar-brand" onclick="switchTab('radar')" style="cursor: pointer;">
             <i class="bi bi-layers-half me-2" style="color: var(--accent);"></i>Quant<span>BIST</span>
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" style="border: none; color: white;">
@@ -204,6 +149,9 @@
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
                     <a class="nav-link active" id="nav-radar" onclick="switchTab('radar')">Canlı Radar</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="nav-backtest" onclick="switchTab('backtest')">Performans</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" id="nav-about" onclick="switchTab('about')">Mimari</a>
@@ -255,7 +203,65 @@
         </div>
     </div>
 
-    <!-- 2. BÖLÜM: MİMARİ -->
+    <!-- 2. BÖLÜM: PERFORMAS & BACKTEST -->
+    <div id="backtest" class="section-panel">
+        <div class="text-center mb-5">
+            <h2 class="header-title">Backtest Raporları</h2>
+            <p class="header-subtitle">Geçmiş piyasa verilerinde yapılan otonom test sonuçları.</p>
+        </div>
+
+        <div class="row g-4">
+            <!-- 6 Aylık Test -->
+            <div class="col-md-6">
+                <div class="info-card">
+                    <div class="d-flex align-items-center justify-content-between mb-4">
+                        <h4 class="mb-0" style="color: var(--accent);">Son 6 Ay (Orta Vade)</h4>
+                        <i class="bi bi-clock-history fs-4" style="color: var(--text-muted);"></i>
+                    </div>
+                    <p class="mb-4 text-muted">Testere (yatay) piyasanın hakim olduğu son 6 ayda, PPF nakit değerlendirme ve EMA 200 kalkanının başarılı savunma istatistikleri.</p>
+                    
+                    <div class="stat-box">
+                        <span class="stat-label">Piyasayı Yenme Başarısı</span>
+                        <span class="stat-value text-white">25 / 27 Varlık</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-label">BİST30 (Al-Bekle) Ortalama</span>
+                        <span class="stat-value stat-loss">%-8.50</span>
+                    </div>
+                    <div class="stat-box" style="border-color: rgba(16, 185, 129, 0.3);">
+                        <span class="stat-label" style="color: var(--green);">Algoritma Ortalaması</span>
+                        <span class="stat-value stat-win">+%18.20</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2 Yıllık Test -->
+            <div class="col-md-6">
+                <div class="info-card">
+                    <div class="d-flex align-items-center justify-content-between mb-4">
+                        <h4 class="mb-0" style="color: var(--accent);">Son 2 Yıl (Makro Vade)</h4>
+                        <i class="bi bi-calendar-check fs-4" style="color: var(--text-muted);"></i>
+                    </div>
+                    <p class="mb-4 text-muted">Büyük boğa rallileri ve sert enflasyonist çöküşleri içeren yaklaşık 500 işlem gününde trend sürme motorunun agresif büyüme tablosu.</p>
+                    
+                    <div class="stat-box">
+                        <span class="stat-label">Piyasayı Yenme Başarısı</span>
+                        <span class="stat-value text-white">23 / 29 Varlık</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-label">BİST30 (Al-Bekle) Ortalama</span>
+                        <span class="stat-value" style="color: #f4f4f5;">+%42.44</span>
+                    </div>
+                    <div class="stat-box" style="border-color: rgba(16, 185, 129, 0.3);">
+                        <span class="stat-label" style="color: var(--green);">Algoritma Ortalaması</span>
+                        <span class="stat-value stat-win">+%94.16</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. BÖLÜM: MİMARİ -->
     <div id="about" class="section-panel">
         <div class="text-center mb-5">
             <h2 class="header-title">Sistem Mimarisi</h2>
@@ -295,7 +301,7 @@
         </div>
     </div>
 
-    <!-- 3. BÖLÜM: İLETİŞİM -->
+    <!-- 4. BÖLÜM: İLETİŞİM -->
     <div id="contact" class="section-panel">
         <div class="profile-card text-center mt-4">
             <h2 class="mb-1" style="font-weight: 700;">Emir Çanakkale</h2>
@@ -328,7 +334,6 @@
 
 <!-- Uygulama JS -->
 <script>
-    // Menü Geçiş Kontrolü
     function switchTab(tabId) {
         document.querySelectorAll('.section-panel').forEach(panel => {
             panel.classList.remove('active');
@@ -341,7 +346,6 @@
         document.getElementById('nav-' + tabId).classList.add('active');
     }
 
-    // Veri Çekme ve Tablo Oluşturma
     async function loadLiveSignals() {
         try {
             const response = await fetch('signals.json');
@@ -356,8 +360,6 @@
             tbody.innerHTML = ""; 
             
             data.sinyaller.forEach(item => {
-                
-                // Sinyal İkonları ve Renkleri
                 let signalHtml = "";
                 if (item.sinyal === "AL") {
                     signalHtml = `<span style="color: var(--green); font-weight: 600;"><i class="bi bi-arrow-up-right-circle-fill me-1"></i> AL</span>`;
@@ -367,7 +369,6 @@
                     signalHtml = `<span style="color: var(--text-muted); font-weight: 500;"><i class="bi bi-dash-circle me-1"></i> TUT</span>`;
                 }
 
-                // Getiri Renklendirmesi ve Formatı
                 let getiriHtml = item.getiri > 0 
                     ? `<span style="color: var(--green); font-weight: 600;">+%${item.getiri}</span>` 
                     : `<span style="color: var(--red); font-weight: 600;">%${item.getiri}</span>`;
