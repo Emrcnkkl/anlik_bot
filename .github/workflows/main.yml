@@ -1,0 +1,35 @@
+name: BIST Quant Bot (Saatlik)
+
+on:
+  schedule:
+    # Hafta içi (1-5) UTC 07:00 - 15:00 arası her saat başı çalışır
+    # (Türkiye saatiyle tam 10:00'dan 18:00'e kadar çalışır)
+    - cron: '0 7-15 * * 1-5'
+  workflow_dispatch: # Manuel tetikleme butonu
+
+jobs:
+  tarama-yap:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # json dosyasını depoya kaydedebilmesi için zorunlu
+
+    steps:
+      - name: Depoyu Kopyala
+        uses: actions/checkout@v4
+
+      - name: Python Kurulumu
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Kütüphaneleri Yükle
+        run: pip install yfinance pandas pytz
+
+      - name: Botu Çalıştır
+        run: python quant_bot.py
+
+      - name: Güncel Sinyalleri Depoya Kaydet (Git Commit)
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Otonom Sinyal Güncellemesi: signals.json"
+          file_pattern: signals.json
