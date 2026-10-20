@@ -7,7 +7,9 @@ from datetime import datetime, timedelta
 
 warnings.filterwarnings('ignore')
 
+# Listenin en başına Gram Altın eklendi
 bist30 = [
+    "GRAM_ALTIN",
     "AKBNK.IS", "ALARK.IS", "ASELS.IS", "ASTOR.IS", "BIMAS.IS",
     "BRSAN.IS", "CIMSA.IS", "CWENE.IS", "DOAS.IS", "EKGYO.IS",
     "ENKAI.IS", "EREGL.IS", "EUPWR.IS", "FROTO.IS", "GARAN.IS",
@@ -116,15 +118,35 @@ print("⏳ Web Sitesi İçin Güncel Sinyaller Hesaplanıyor...")
 
 for hisse in bist30:
     try:
-        df = yf.download(hisse, period="3y", interval="1d", progress=False)
-        if len(df) < 250: continue
-        
-        if isinstance(df.columns, pd.MultiIndex): df.columns = df.columns.get_level_values(0)
-        df['Close'] = pd.to_numeric(df['Close'].squeeze())
-        df['High'] = pd.to_numeric(df.get('High', df['Close']).squeeze())
-        df['Low'] = pd.to_numeric(df.get('Low', df['Close']).squeeze())
-        df.dropna(subset=['Close'], inplace=True)
-        
+        # GRAM ALTIN İÇİN ÖZEL VERİ ÜRETİMİ
+        if hisse == "GRAM_ALTIN":
+            ons_df = yf.download("GC=F", period="3y", interval="1d", progress=False)
+            usd_df = yf.download("TRY=X", period="3y", interval="1d", progress=False)
+            
+            if isinstance(ons_df.columns, pd.MultiIndex): ons_df.columns = ons_df.columns.get_level_values(0)
+            if isinstance(usd_df.columns, pd.MultiIndex): usd_df.columns = usd_df.columns.get_level_values(0)
+            
+            ons_close = pd.to_numeric(ons_df['Close'].squeeze())
+            usd_close = pd.to_numeric(usd_df['Close'].squeeze())
+            
+            ortak = pd.concat([ons_close, usd_close], axis=1, join='inner').dropna()
+            ortak.columns = ['Ons', 'UsdTry']
+            
+            df = pd.DataFrame(index=ortak.index)
+            df['Close'] = (ortak['Ons'] * ortak['UsdTry']) / 31.1034768
+            df['High'] = df['Close']
+            df['Low'] = df['Close']
+            
+        else:
+            df = yf.download(hisse, period="3y", interval="1d", progress=False)
+            if len(df) < 250: continue
+            
+            if isinstance(df.columns, pd.MultiIndex): df.columns = df.columns.get_level_values(0)
+            df['Close'] = pd.to_numeric(df['Close'].squeeze())
+            df['High'] = pd.to_numeric(df.get('High', df['Close']).squeeze())
+            df['Low'] = pd.to_numeric(df.get('Low', df['Close']).squeeze())
+            df.dropna(subset=['Close'], inplace=True)
+            
         df['EMA200'] = df['Close'].ewm(span=200, adjust=False).mean()
         test_verisi = df.tail(500).copy()
         
@@ -154,7 +176,6 @@ for hisse in bist30:
             fiyat = son_satir['Close']
             ema200 = son_satir['EMA200']
 
-            # Son sinyal AL olsa bile fiyat EMA200'ün altındaysa NÖTR kabul et
             if sinyal_kodu == 1 and fiyat > ema200:
                 sinyal_yazi = "AL"
             elif sinyal_kodu == -1:
@@ -167,7 +188,7 @@ for hisse in bist30:
                 "sinyal": sinyal_yazi,
                 "fiyat": round(fiyat, 2),
                 "strateji": f"{en_iyi_isim} ({en_iyi_param})",
-                "stop": "Trend Çıkışı", # Sabit stop kaldırıldığı için güncellendi
+                "stop": "Trend Çıkışı",
                 "getiri": round(en_iyi_skor, 1)
             })
             
@@ -178,7 +199,6 @@ veri_paketi = {
     "guncellenme_tarihi": (datetime.utcnow() + timedelta(hours=3)).strftime("%d.%m.%Y %H:%M"),
     "sinyaller": site_verileri
 }
-
 
 with open("signals.json", "w", encoding="utf-8") as f:
     json.dump(veri_paketi, f, ensure_ascii=False, indent=4)
