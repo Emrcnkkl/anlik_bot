@@ -1,0 +1,41 @@
+name: Günlük BİST30 Kantitatif Analiz Botu
+
+on:
+  schedule:
+    # Borsa İstanbul (BİST) 18:00'da kapanır. 
+    # UTC saatine göre 15:15, Türkiye saatine göre 18:15'e denk gelir.
+    # Sadece hafta içi günlerde (1-5: Pazartesi-Cuma) çalışır.
+    - cron: '15 15 * * 1-5'
+  workflow_dispatch: # GitHub üzerinden manuel tetikleme butonu ekler
+
+jobs:
+  analiz-yap:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Botun signals.json dosyasını siteye yükleyebilmesi için izin
+
+    steps:
+    - name: 📥 Depoyu Klonla
+      uses: actions/checkout@v3
+
+    - name: 🐍 Python Kurulumu
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: 📦 Gerekli Kütüphaneleri Yükle
+      run: |
+        python -m pip install --upgrade pip
+        pip install yfinance pandas numpy
+
+    - name: ⚙️ Yapay Zeka Botunu Çalıştır
+      run: python quant_bot.py
+
+    - name: 📤 Sonuçları Web Sitesine Yükle (Commit)
+      run: |
+        git config --global user.name "quant-bot[bot]"
+        git config --global user.email "quant-bot[bot]@users.noreply.github.com"
+        git add signals.json
+        # Eğer piyasada hiçbir şey değişmediyse botun hata vermemesi için || echo kullanıyoruz
+        git commit -m "🤖 Otonom Güncelleme: Günlük BİST30 Sinyalleri" || echo "Değişiklik yok, commit atlanıyor."
+        git push
