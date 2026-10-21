@@ -187,10 +187,12 @@ for hisse in bist30:
                 "hisse": hisse.replace(".IS", ""),
                 "sinyal": sinyal_yazi,
                 "fiyat": round(fiyat, 2),
+                "ema200": round(ema200, 2),    # X-Ray Ekranı için eklenen yeni satır
                 "strateji": f"{en_iyi_isim} ({en_iyi_param})",
                 "stop": "Trend Çıkışı",
                 "getiri": round(en_iyi_skor, 1)
             })
+
             
     except Exception as e:
         pass
