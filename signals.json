@@ -1,15 +1,6 @@
 {
-    "guncellenme_tarihi": "21.10.2026 04:44",
+    "guncellenme_tarihi": "21.10.2026 05:09",
     "sinyaller": [
-        {
-            "hisse": "GRAM_ALTIN",
-            "sinyal": "TUT",
-            "fiyat": 6593.89,
-            "ema200": 6419.56,
-            "strateji": "EMA Kesişim (9/21)",
-            "stop": "Trend Çıkışı",
-            "getiri": 146.7
-        },
         {
             "hisse": "AKBNK",
             "sinyal": "TUT",
