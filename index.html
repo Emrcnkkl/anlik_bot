@@ -354,7 +354,14 @@
         document.getElementById(tabId).classList.add('active');
         document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
         document.getElementById('nav-' + tabId).classList.add('active');
-        if (tabId === 'backtest' && !isChartRendered) { setTimeout(renderTradingViewChart, 150); isChartRendered = true; }
+        
+        // HATA ÇÖZÜMÜ: Animasyon süresini bekleyip (500ms) grafiği öyle çizdiriyoruz ki boyut 0px kalmasın
+        if (tabId === 'backtest' && !isChartRendered) { 
+            setTimeout(() => {
+                renderTradingViewChart();
+                isChartRendered = true;
+            }, 500); 
+        }
     }
 
     function animatePortfolioBalance(startValue, endValue, duration) {
@@ -379,10 +386,9 @@
         if (!chartContainer) return;
         chartContainer.innerHTML = ''; 
 
-        // 1. DÜZELTME: Kutu boyutunu 0px kalmaması için zorunlu (fallback) değerlerle başlattım
+        // HATA ÇÖZÜMÜ: autoSize: true komutuyla kutunun boyutunu kütüphaneye otomatik hesaplattık
         const chart = LightweightCharts.createChart(chartContainer, {
-            width: chartContainer.clientWidth || 800,
-            height: 380,
+            autoSize: true,
             layout: { textColor: '#a1a1aa', background: { type: 'solid', color: 'transparent' } },
             grid: { vertLines: { color: 'rgba(39, 39, 42, 0.5)' }, horzLines: { color: 'rgba(39, 39, 42, 0.5)' } },
             rightPriceScale: { borderColor: '#27272a' }, timeScale: { borderColor: '#27272a' },
@@ -395,10 +401,15 @@
         let algoData = []; let bistData = [];
         let algoVal = 100; let bistVal = 100;
         
-        // 2. DÜZELTME: Tarih formatlarını direkt "Saniye (Unix)" tipine çevirip hataları sıfırladım
-        let timestamp = Math.floor(new Date('2024-01-01').getTime() / 1000);
+        // HATA ÇÖZÜMÜ: Tarih formatı hatasız çizim için basit 'YYYY-MM-DD' String (Metin) tipine dönüştürüldü
+        let d = new Date(2023, 0, 1); 
 
         for(let i=0; i<500; i++) { 
+            let year = d.getFullYear();
+            let month = String(d.getMonth() + 1).padStart(2, '0');
+            let day = String(d.getDate()).padStart(2, '0');
+            let dateStr = `${year}-${month}-${day}`;
+            
             bistVal += (Math.random() - 0.48) * 2; 
             let algoChange = (Math.random() - 0.42) * 1.5;
             if (bistVal < 100 && algoChange < 0) algoChange = 0.05; 
@@ -408,22 +419,15 @@
             let finalAlgo = algoVal * 0.95 + (100 + (94.16 * progress)) * 0.05;
             let finalBist = bistVal * 0.95 + (100 + (42.44 * progress)) * 0.05;
 
-            algoData.push({ time: timestamp, value: Number(finalAlgo.toFixed(2)) });
-            bistData.push({ time: timestamp, value: Number(finalBist.toFixed(2)) });
+            algoData.push({ time: dateStr, value: Number(finalAlgo.toFixed(2)) });
+            bistData.push({ time: dateStr, value: Number(finalBist.toFixed(2)) });
             
-            timestamp += 86400; // Her döngüde tam olarak 1 gün (86400 saniye) eklendi
+            d.setDate(d.getDate() + 1);
         }
         
         algoSeries.setData(algoData); 
         bistSeries.setData(bistData);
         chart.timeScale().fitContent();
-
-        // Sayfa boyutu değiştiğinde veya sekme açıldığında grafiği otomatik ekrana uyduran sistem
-        new ResizeObserver(entries => {
-            if(entries.length === 0 || entries[0].target !== chartContainer) return;
-            const newRect = entries[0].contentRect;
-            chart.applyOptions({ height: newRect.height, width: newRect.width });
-        }).observe(chartContainer);
     }
 
     function openXrayModal(index) {
