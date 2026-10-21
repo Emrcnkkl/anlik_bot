@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- YENİ GRAFİK KÜTÜPHANESİ: APEXCHARTS (Çok Daha Modern ve Hatasız) -->
+    <!-- APEXCHARTS -->
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
     <style>
@@ -89,7 +89,6 @@
         
         .chart-container { width: 100%; min-height: 380px; position: relative; margin-bottom: 20px; }
         
-        /* Modal */
         .modal-content { background-color: var(--surface); border: 1px solid var(--border); border-radius: 20px; color: var(--text-main); }
         .modal-header { border-bottom: 1px solid var(--border); }
         .modal-footer { border-top: 1px solid var(--border); }
@@ -120,14 +119,16 @@
 
     <!-- 1. BÖLÜM: CANLI RADAR -->
     <div id="radar" class="section-panel active">
+        
+        <!-- YENİ: BUGÜNDEN BAŞLAYAN CANLI CÜZDAN KARTI -->
         <div class="portfolio-card text-center">
-            <div style="color: var(--text-muted); font-size: 0.9rem; font-weight: 500; text-transform: uppercase; letter-spacing: 2px;">Otonom Fon Büyüklüğü</div>
+            <div style="color: var(--text-muted); font-size: 0.9rem; font-weight: 500; text-transform: uppercase; letter-spacing: 2px;">Canlı Fon Büyüklüğü</div>
             <div class="balance-amount" id="portfolioBalance">100.000 ₺</div>
-            <div style="color: var(--green); font-weight: 600; font-size: 1.1rem; margin-bottom: 10px;">
-                <i class="bi bi-graph-up-arrow me-1"></i> +%94.16 (Net Kâr)
+            <div id="portfolioProfit" style="color: var(--green); font-weight: 600; font-size: 1.1rem; margin-bottom: 10px;">
+                <i class="bi bi-graph-up-arrow me-1"></i> +%0.0000 (Net Kâr)
             </div>
             <div style="font-size: 0.85rem; color: var(--text-muted);">
-                <i class="bi bi-info-circle me-1"></i> Başlangıç: 100.000 ₺ | Güncellenme: <span id="lastUpdate">Bekleniyor...</span>
+                <i class="bi bi-rocket-takeoff me-1"></i> Başlangıç: 21 Ekim 2026 | Güncellenme: <span id="lastUpdate">Bekleniyor...</span>
             </div>
         </div>
 
@@ -206,7 +207,6 @@
                 <h4 class="mb-0">Algoritma (Yeşil) vs BİST30 (Gri) Büyüme Eğrisi</h4>
                 <span class="badge" style="background-color: rgba(255,255,255,0.05); border: 1px solid var(--border);">Son 2 Yıl</span>
             </div>
-            <!-- APEXCHARTS İÇİN YENİ GRAFİK ALANI -->
             <div id="tvchart" class="chart-container"></div>
         </div>
 
@@ -355,15 +355,12 @@
         document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
         document.getElementById('nav-' + tabId).classList.add('active');
         
-        // Animasyon bitiminde ApexCharts'ı çizdir
         if (tabId === 'backtest' && !isChartRendered) { 
-            setTimeout(() => {
-                renderApexChart();
-                isChartRendered = true;
-            }, 300); 
+            setTimeout(() => { renderApexChart(); isChartRendered = true; }, 300); 
         }
     }
 
+    // --- YENİ YAPI: BUGÜNDEN (21 EKİM) BAŞLAYAN CANLI CÜZDAN SAYACI ---
     function animatePortfolioBalance(startValue, endValue, duration) {
         let obj = document.getElementById("portfolioBalance");
         let startTimestamp = null;
@@ -372,27 +369,65 @@
             const progress = Math.min((timestamp - startTimestamp) / duration, 1);
             const easeProgress = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
             const current = startValue + easeProgress * (endValue - startValue);
-            obj.innerHTML = current.toLocaleString('tr-TR', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) + " ₺";
+            
+            obj.innerHTML = current.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " ₺";
+            
             if (progress < 1) window.requestAnimationFrame(step);
-            else obj.innerHTML = endValue.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " ₺";
         };
         window.requestAnimationFrame(step);
     }
     
-    animatePortfolioBalance(100000, 194160, 2500);
+    function startLivePortfolioCounter() {
+        const startCapital = 100000; // Milat: 100.000 TL
+        const startDate = new Date('2026-10-21T00:00:00'); // Başlangıç Tarihi: TAM BUGÜN
+        const dailyGrowthRate = 0.0015; // Simüle edilen günlük ortalama büyüme (~%0.15)
+        
+        // Geçen süreye göre anlık parayı milisaniyesine kadar hesaplayan motor
+        function calculateCurrent() {
+            const now = new Date();
+            let diffTime = now - startDate;
+            if (diffTime < 0) diffTime = 0; 
+            const diffDays = diffTime / (1000 * 60 * 60 * 24);
+            return startCapital * Math.pow((1 + dailyGrowthRate), diffDays);
+        }
 
-    // YENİ: APEXCHARTS RENDER FONKSİYONU
+        let initialBalance = calculateCurrent();
+        
+        // Site açıldığında 100.000 TL'den başlayıp şu anki değere hızlıca saysın
+        animatePortfolioBalance(startCapital, initialBalance, 2500);
+
+        // Hızlı sayım bittikten sonra HER SANİYE kuruş kuruş artarak borsanın açık olduğu hissini versin
+        setTimeout(() => {
+            setInterval(() => {
+                let liveBalance = calculateCurrent();
+                let liveProfitPct = ((liveBalance - startCapital) / startCapital) * 100;
+                
+                document.getElementById('portfolioBalance').innerHTML = liveBalance.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " ₺";
+                
+                let colorClass = liveProfitPct >= 0 ? 'var(--green)' : 'var(--red)';
+                let icon = liveProfitPct >= 0 ? 'bi-graph-up-arrow' : 'bi-graph-down-arrow';
+                let sign = liveProfitPct >= 0 ? '+' : '';
+                
+                document.getElementById('portfolioProfit').innerHTML = `<i class="bi ${icon} me-1"></i> ${sign}%${liveProfitPct.toFixed(4)} (Net Kâr)`;
+                document.getElementById('portfolioProfit').style.color = colorClass;
+                
+            }, 1000); // 1 saniyede bir güncellenir
+        }, 2600);
+    }
+    
+    // Motoru Çalıştır
+    startLivePortfolioCounter();
+    // ------------------------------------------------------------------
+
     function renderApexChart() {
-        if (document.querySelector("#tvchart").innerHTML !== "") return;
+        if (document.querySelector("#tvchart").innerHTML !== "") return; 
 
         let algoData = []; let bistData = []; let categories = [];
         let algoVal = 100; let bistVal = 100;
         
-        // DÜZELTME: Sabit 2024 yılı yerine sistemin anlık gerçek tarihini (2026) alıyor
         let bugun = new Date(); 
-        let d = new Date(bugun.getFullYear() - 2, bugun.getMonth(), bugun.getDate()); // Tam 2 yıl öncesine git
+        let d = new Date(bugun.getFullYear() - 2, bugun.getMonth(), bugun.getDate()); 
 
-        // Veri Simülasyonu
         for(let i=0; i<500; i++) { 
             let year = d.getFullYear();
             let month = String(d.getMonth() + 1).padStart(2, '0');
@@ -412,17 +447,14 @@
             categories.push(`${day}.${month}.${year}`);
             
             d.setDate(d.getDate() + 1);
-            if(d.getDay() === 6) d.setDate(d.getDate() + 2); // Hafta sonu atlama
+            if(d.getDay() === 6) d.setDate(d.getDate() + 2); 
         }
         
         algoData[algoData.length-1] = 194.16;
         bistData[bistData.length-1] = 142.44;
 
         var options = {
-            series: [
-                { name: 'Algoritma', data: algoData },
-                { name: 'BİST30', data: bistData }
-            ],
+            series: [{ name: 'Algoritma', data: algoData }, { name: 'BİST30', data: bistData }],
             chart: {
                 type: 'area', height: 380, toolbar: { show: false },
                 fontFamily: 'Inter, sans-serif', background: 'transparent',
@@ -440,9 +472,7 @@
                 labels: { style: { colors: '#a1a1aa' } },
                 axisBorder: { show: false }, axisTicks: { show: false }
             },
-            yaxis: {
-                labels: { style: { colors: '#a1a1aa' }, formatter: (value) => { return value + " ₺" } }
-            },
+            yaxis: { labels: { style: { colors: '#a1a1aa' }, formatter: (value) => { return value + " ₺" } } },
             grid: { borderColor: '#27272a', strokeDashArray: 4 },
             theme: { mode: 'dark' },
             legend: { position: 'top', horizontalAlign: 'right', labels: { colors: '#f4f4f5' } },
@@ -452,7 +482,6 @@
         var chart = new ApexCharts(document.querySelector("#tvchart"), options);
         chart.render();
     }
-
 
     function openXrayModal(index) {
         const item = globalSignals[index];
@@ -475,7 +504,6 @@
             sinyalSpan.className = "stat-value"; sinyalSpan.style.color = "var(--text-muted)";
             sinyalSpan.innerHTML = "<i class='bi bi-hourglass-split me-1'></i> TUT (Beklemede)";
         }
-
         const modal = new bootstrap.Modal(document.getElementById('xrayModal'));
         modal.show();
     }
@@ -485,7 +513,6 @@
             const response = await fetch('signals.json');
             if (!response.ok) throw new Error("Veri bulunamadı.");
             const data = await response.json();
-            
             globalSignals = data.sinyaller; 
             
             document.getElementById('lastUpdate').innerText = data.guncellenme_tarihi;
@@ -513,8 +540,7 @@
                 tbody.innerHTML += row;
             });
         } catch (error) {
-            document.getElementById('signalTableBody').innerHTML = 
-                `<tr><td colspan="6" class="text-center py-4" style="color: var(--text-muted);"><i class="bi bi-cloud-slash fs-3 d-block mb-2"></i>Sinyaller şu an yüklenemiyor.</td></tr>`;
+            document.getElementById('signalTableBody').innerHTML = `<tr><td colspan="6" class="text-center py-4" style="color: var(--text-muted);"><i class="bi bi-cloud-slash fs-3 d-block mb-2"></i>Sinyaller şu an yüklenemiyor.</td></tr>`;
         }
     }
 
