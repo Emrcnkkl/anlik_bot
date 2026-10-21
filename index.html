@@ -383,13 +383,14 @@
 
     // YENİ: APEXCHARTS RENDER FONKSİYONU
     function renderApexChart() {
-        if (document.querySelector("#tvchart").innerHTML !== "") return; // Çift çizmeyi engelle
+        if (document.querySelector("#tvchart").innerHTML !== "") return;
 
         let algoData = []; let bistData = []; let categories = [];
         let algoVal = 100; let bistVal = 100;
         
-        let d = new Date(2024, 9, 21); // Günümüz
-        d.setFullYear(d.getFullYear() - 2); // 2 Yıl Öncesi
+        // DÜZELTME: Sabit 2024 yılı yerine sistemin anlık gerçek tarihini (2026) alıyor
+        let bugun = new Date(); 
+        let d = new Date(bugun.getFullYear() - 2, bugun.getMonth(), bugun.getDate()); // Tam 2 yıl öncesine git
 
         // Veri Simülasyonu
         for(let i=0; i<500; i++) { 
@@ -451,6 +452,7 @@
         var chart = new ApexCharts(document.querySelector("#tvchart"), options);
         chart.render();
     }
+
 
     function openXrayModal(index) {
         const item = globalSignals[index];
