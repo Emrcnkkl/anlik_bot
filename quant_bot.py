@@ -136,19 +136,29 @@ for hisse in bist30:
             df['Close'] = (ortak['Ons'] * ortak['UsdTry']) / 31.1034768
             df['High'] = df['Close']
             df['Low'] = df['Close']
-            
-        else:
+
+       else:
             df = yf.download(hisse, period="3y", interval="1d", progress=False)
             if len(df) < 250: continue
             
-            if isinstance(df.columns, pd.MultiIndex): df.columns = df.columns.get_level_values(0)
-            df['Close'] = pd.to_numeric(df['Close'].squeeze())
-            df['High'] = pd.to_numeric(df.get('High', df['Close']).squeeze())
-            df['Low'] = pd.to_numeric(df.get('Low', df['Close']).squeeze())
-            df.dropna(subset=['Close'], inplace=True)
+            if isinstance(df.columns, pd.MultiIndex):
+                df.columns = df.columns.get_level_values(0)
             
-        df['EMA200'] = df['Close'].ewm(span=200, adjust=False).mean()
-        test_verisi = df.tail(500).copy()
+            if 'Close' in df.columns:
+                df['Close'] = pd.to_numeric(df['Close'].squeeze())
+            if 'High' in df.columns:
+                df['High'] = pd.to_numeric(df.get('High', df['Close']).squeeze())
+            if 'Low' in df.columns:
+                df['Low'] = pd.to_numeric(df.get('Low', df['Close']).squeeze())
+            
+            df.dropna(subset=['Close'], inplace=True)
+        
+            df['EMA200'] = df['Close'].ewm(span=200, adjust=False).mean()
+            test_verisi = df.tail(500).copy()
+
+
+
+
         
         en_iyi_skor = -999; en_iyi_isim = ""; en_iyi_param = ""; en_iyi_df = None
         
