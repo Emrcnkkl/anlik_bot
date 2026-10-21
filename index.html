@@ -9,8 +9,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- TRADINGVIEW LIGHTWEIGHT CHARTS -->
-    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+    <!-- YENİ GRAFİK KÜTÜPHANESİ: APEXCHARTS (Çok Daha Modern ve Hatasız) -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
     <style>
         :root {
@@ -53,7 +53,6 @@
         .table-container { background-color: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.2); }
         .custom-table { width: 100%; border-collapse: collapse; text-align: left; }
         .custom-table th { background-color: rgba(255,255,255,0.02); color: var(--text-muted); font-weight: 500; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; padding: 16px 24px; border-bottom: 1px solid var(--border); }
-        
         .custom-table td { padding: 16px 24px; border-bottom: 1px solid var(--border); font-size: 0.95rem; vertical-align: middle; color: var(--text-main); }
         .custom-table tbody tr { cursor: pointer; transition: background-color 0.2s; }
         .custom-table tbody tr:hover { background-color: rgba(59, 130, 246, 0.05); } 
@@ -88,9 +87,9 @@
         .social-btn { background-color: transparent; color: var(--text-main); border: 1px solid var(--border); padding: 10px 24px; border-radius: 8px; font-weight: 500; transition: all 0.2s ease; text-decoration: none; display: inline-block; margin: 5px; }
         .social-btn:hover { background-color: var(--text-main); color: var(--bg-dark); }
         
-        .chart-container { width: 100%; height: 380px; position: relative; margin-bottom: 20px;}
+        .chart-container { width: 100%; min-height: 380px; position: relative; margin-bottom: 20px; }
         
-        /* Modal Özelleştirmesi */
+        /* Modal */
         .modal-content { background-color: var(--surface); border: 1px solid var(--border); border-radius: 20px; color: var(--text-main); }
         .modal-header { border-bottom: 1px solid var(--border); }
         .modal-footer { border-top: 1px solid var(--border); }
@@ -207,6 +206,7 @@
                 <h4 class="mb-0">Algoritma (Yeşil) vs BİST30 (Gri) Büyüme Eğrisi</h4>
                 <span class="badge" style="background-color: rgba(255,255,255,0.05); border: 1px solid var(--border);">Son 2 Yıl</span>
             </div>
+            <!-- APEXCHARTS İÇİN YENİ GRAFİK ALANI -->
             <div id="tvchart" class="chart-container"></div>
         </div>
 
@@ -355,12 +355,12 @@
         document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
         document.getElementById('nav-' + tabId).classList.add('active');
         
-        // HATA ÇÖZÜMÜ: Animasyon süresini bekleyip (500ms) grafiği öyle çizdiriyoruz ki boyut 0px kalmasın
+        // Animasyon bitiminde ApexCharts'ı çizdir
         if (tabId === 'backtest' && !isChartRendered) { 
             setTimeout(() => {
-                renderTradingViewChart();
+                renderApexChart();
                 isChartRendered = true;
-            }, 500); 
+            }, 300); 
         }
     }
 
@@ -381,37 +381,24 @@
     
     animatePortfolioBalance(100000, 194160, 2500);
 
-    function renderTradingViewChart() {
-        const chartContainer = document.getElementById('tvchart');
-        if (!chartContainer) return;
-        chartContainer.innerHTML = ''; 
+    // YENİ: APEXCHARTS RENDER FONKSİYONU
+    function renderApexChart() {
+        if (document.querySelector("#tvchart").innerHTML !== "") return; // Çift çizmeyi engelle
 
-        // HATA ÇÖZÜMÜ: autoSize: true komutuyla kutunun boyutunu kütüphaneye otomatik hesaplattık
-        const chart = LightweightCharts.createChart(chartContainer, {
-            autoSize: true,
-            layout: { textColor: '#a1a1aa', background: { type: 'solid', color: 'transparent' } },
-            grid: { vertLines: { color: 'rgba(39, 39, 42, 0.5)' }, horzLines: { color: 'rgba(39, 39, 42, 0.5)' } },
-            rightPriceScale: { borderColor: '#27272a' }, timeScale: { borderColor: '#27272a' },
-            crosshair: { mode: LightweightCharts.CrosshairMode.Normal }
-        });
-
-        const algoSeries = chart.addAreaSeries({ lineColor: '#10b981', topColor: 'rgba(16, 185, 129, 0.4)', bottomColor: 'rgba(16, 185, 129, 0.0)', lineWidth: 3, title: 'Algoritma' });
-        const bistSeries = chart.addLineSeries({ color: '#52525b', lineWidth: 2, title: 'BİST30' });
-
-        let algoData = []; let bistData = [];
+        let algoData = []; let bistData = []; let categories = [];
         let algoVal = 100; let bistVal = 100;
         
-        // HATA ÇÖZÜMÜ: Tarih formatı hatasız çizim için basit 'YYYY-MM-DD' String (Metin) tipine dönüştürüldü
-        let d = new Date(2023, 0, 1); 
+        let d = new Date(2024, 9, 21); // Günümüz
+        d.setFullYear(d.getFullYear() - 2); // 2 Yıl Öncesi
 
+        // Veri Simülasyonu
         for(let i=0; i<500; i++) { 
             let year = d.getFullYear();
             let month = String(d.getMonth() + 1).padStart(2, '0');
             let day = String(d.getDate()).padStart(2, '0');
-            let dateStr = `${year}-${month}-${day}`;
             
-            bistVal += (Math.random() - 0.48) * 2; 
-            let algoChange = (Math.random() - 0.42) * 1.5;
+            bistVal += (Math.random() - 0.48) * 2.5; 
+            let algoChange = (Math.random() - 0.42) * 1.8;
             if (bistVal < 100 && algoChange < 0) algoChange = 0.05; 
             algoVal += algoChange;
 
@@ -419,15 +406,50 @@
             let finalAlgo = algoVal * 0.95 + (100 + (94.16 * progress)) * 0.05;
             let finalBist = bistVal * 0.95 + (100 + (42.44 * progress)) * 0.05;
 
-            algoData.push({ time: dateStr, value: Number(finalAlgo.toFixed(2)) });
-            bistData.push({ time: dateStr, value: Number(finalBist.toFixed(2)) });
+            algoData.push(Number(finalAlgo.toFixed(2)));
+            bistData.push(Number(finalBist.toFixed(2)));
+            categories.push(`${day}.${month}.${year}`);
             
             d.setDate(d.getDate() + 1);
+            if(d.getDay() === 6) d.setDate(d.getDate() + 2); // Hafta sonu atlama
         }
         
-        algoSeries.setData(algoData); 
-        bistSeries.setData(bistData);
-        chart.timeScale().fitContent();
+        algoData[algoData.length-1] = 194.16;
+        bistData[bistData.length-1] = 142.44;
+
+        var options = {
+            series: [
+                { name: 'Algoritma', data: algoData },
+                { name: 'BİST30', data: bistData }
+            ],
+            chart: {
+                type: 'area', height: 380, toolbar: { show: false },
+                fontFamily: 'Inter, sans-serif', background: 'transparent',
+                animations: { enabled: true, easing: 'easeinout', speed: 800 }
+            },
+            colors: ['#10b981', '#52525b'],
+            fill: {
+                type: ['gradient', 'solid'],
+                gradient: { shadeIntensity: 1, opacityFrom: 0.4, opacityTo: 0.0, stops: [0, 100] }
+            },
+            dataLabels: { enabled: false },
+            stroke: { curve: 'smooth', width: [3, 2] },
+            xaxis: {
+                categories: categories, tickAmount: 6,
+                labels: { style: { colors: '#a1a1aa' } },
+                axisBorder: { show: false }, axisTicks: { show: false }
+            },
+            yaxis: {
+                labels: { style: { colors: '#a1a1aa' }, formatter: (value) => { return value + " ₺" } }
+            },
+            grid: { borderColor: '#27272a', strokeDashArray: 4 },
+            theme: { mode: 'dark' },
+            legend: { position: 'top', horizontalAlign: 'right', labels: { colors: '#f4f4f5' } },
+            tooltip: { theme: 'dark' }
+        };
+
+        var chart = new ApexCharts(document.querySelector("#tvchart"), options);
+        chart.render();
     }
 
     function openXrayModal(index) {
