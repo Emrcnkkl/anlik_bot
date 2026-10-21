@@ -137,7 +137,7 @@ for hisse in bist30:
             df['High'] = df['Close']
             df['Low'] = df['Close']
 
-       else:
+        else:
             df = yf.download(hisse, period="3y", interval="1d", progress=False)
             if len(df) < 250: continue
             
