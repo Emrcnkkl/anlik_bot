@@ -103,6 +103,19 @@
         .stat-value { font-size: 1rem; font-weight: 700; font-family: monospace; text-align: right;}
         .stat-win { color: var(--green); } .stat-loss { color: var(--red); }
         
+        /* Kaydırılabilir Hisse Listesi */
+        .scrollable-stock-list { flex-grow: 1; max-height: 230px; overflow-y: auto; margin-top: 10px; border-top: 1px solid var(--border); padding-top: 15px; }
+        .scrollable-stock-list::-webkit-scrollbar { width: 6px; }
+        .scrollable-stock-list::-webkit-scrollbar-track { background: transparent; }
+        .scrollable-stock-list::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 10px; }
+        .stock-perf-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 5px; border-bottom: 1px dashed rgba(255,255,255,0.05); }
+        .stock-perf-row:last-child { border-bottom: none; }
+        .stock-name { font-weight: 600; font-size: 0.9rem; color: var(--text-main); }
+        .perf-badges { display: flex; gap: 8px; font-size: 0.75rem; }
+        .perf-bh { background-color: rgba(255,255,255,0.05); color: #a1a1aa; padding: 4px 8px; border-radius: 4px; font-weight: 600; width: 75px; text-align: center; }
+        .perf-algo-win { background-color: rgba(16, 185, 129, 0.1); color: var(--green); border: 1px solid rgba(16,185,129,0.2); padding: 4px 8px; border-radius: 4px; font-weight: 600; width: 75px; text-align: center; }
+        .perf-algo-loss { background-color: rgba(239, 68, 68, 0.1); color: var(--red); border: 1px solid rgba(239,68,68,0.2); padding: 4px 8px; border-radius: 4px; font-weight: 600; width: 75px; text-align: center; }
+
         /* Intro.JS Karanlık Tema */
         .introjs-tooltip { background-color: #18181b !important; color: #f4f4f5 !important; border: 1px solid #3f3f46 !important; border-radius: 12px !important; box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important; font-family: 'Inter', sans-serif !important; }
         .introjs-arrow.top { border-bottom-color: #18181b !important; }
@@ -114,7 +127,9 @@
         .introjs-bullets ul li a { background: #3f3f46 !important; }
         .introjs-bullets ul li a.active { background: var(--accent) !important; }
 
-        .info-card { background-color: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 30px; height: 100%; }
+        .info-card { background-color: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 30px; height: 100%; display: flex; flex-direction: column; }
+        .info-icon { font-size: 1.8rem; color: var(--text-main); margin-bottom: 20px; }
+        .info-card h4 { font-weight: 600; font-size: 1.2rem; margin-bottom: 15px; }
         .desc-text { color: #d1d5db; line-height: 1.6; font-size: 0.95rem; margin-bottom: 25px; }
         
         .profile-card { background-color: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 50px; max-width: 600px; margin: 0 auto; }
@@ -181,11 +196,12 @@
                             <th>Günlük Sinyal</th>
                             <th>Anlık Fiyat</th>
                             <th>Algoritma Zekası</th>
+                            <th>Çıkış Planı</th>
                             <th class="text-end" style="padding-right: 30px;">Tarihsel Getiri</th>
                         </tr>
                     </thead>
                     <tbody id="signalTableBody">
-                        <tr><td colspan="5" class="text-center py-5"><div class="spinner-border spinner-border-sm text-secondary me-2"></div><span style="color: var(--text-muted);">Bulut sunucudan veriler çekiliyor...</span></td></tr>
+                        <tr><td colspan="6" class="text-center py-5"><div class="spinner-border spinner-border-sm text-secondary me-2"></div><span style="color: var(--text-muted);">Bulut sunucudan veriler çekiliyor...</span></td></tr>
                     </tbody>
                 </table>
             </div>
@@ -229,44 +245,129 @@
         </div>
     </div>
 
-    <!-- 2. BÖLÜM: PERFORMANS -->
+    <!-- 2. BÖLÜM: PERFORMANS & BACKTEST (TÜM DETAYLAR BİR ARADA) -->
     <div id="backtest" class="section-panel">
-        <div class="text-center mb-4"><h2 class="header-title">Performans Analizi</h2></div>
+        <div class="text-center mb-4">
+            <h2 class="header-title">Performans Analizi</h2>
+            <p class="header-subtitle">Algoritmanın piyasa çöküşlerine ve rallilerine karşı simülasyonu.</p>
+        </div>
+
         <div class="info-card mb-5" style="padding: 20px;">
             <div class="d-flex justify-content-between align-items-center mb-3 px-3">
-                <h4 class="mb-0">Algoritma (Yeşil) vs BİST30 (Gri)</h4>
+                <h4 class="mb-0">Algoritma (Yeşil) vs BİST30 (Gri) Büyüme Eğrisi</h4>
                 <span class="badge" style="background-color: rgba(255,255,255,0.05); border: 1px solid var(--border);">Son 2 Yıl</span>
             </div>
             <div id="tvchart" class="chart-container"></div>
+        </div>
+
+        <div class="row g-4">
+            <!-- 6 Aylık Test -->
+            <div class="col-md-6">
+                <div class="info-card">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <h4 class="mb-0" style="color: var(--accent);">Son 6 Ay (Orta Vade)</h4>
+                        <i class="bi bi-clock-history fs-4" style="color: var(--text-muted);"></i>
+                    </div>
+                    <p class="desc-text">Testere (yatay) piyasanın hakim olduğu son 6 ayda, PPF nakit değerlendirme ve EMA 200 kalkanının başarılı savunma istatistikleri.</p>
+                    
+                    <div class="stat-box">
+                        <span class="stat-label">Piyasayı Yenme Başarısı</span>
+                        <span class="stat-value text-white">25 / 27 Varlık</span>
+                    </div>
+                    <div class="stat-box" style="margin-bottom: 5px;">
+                        <span class="stat-label">BİST30 Ortalama vs Algoritma</span>
+                        <span class="stat-value"><span class="stat-loss">%-8.50</span> <span style="color: var(--text-muted); font-weight:400;">|</span> <span class="stat-win">+%18.20</span></span>
+                    </div>
+
+                    <div class="scrollable-stock-list mt-3">
+                        <div style="font-size: 0.7rem; color: var(--text-muted); text-align: right; margin-bottom: 5px; padding-right: 5px;">AL-BEKLE vs ALGORİTMA</div>
+                        <div class="stock-perf-row"><span class="stock-name">GRAM_ALTIN</span><div class="perf-badges"><span class="perf-bh">%-5.5</span><span class="perf-algo-win">+%13.3</span></div></div>
+                        <div class="stock-perf-row"><span class="stock-name">AKBNK</span><div class="perf-badges"><span class="perf-bh">%-11.4</span><span class="perf-algo-win">+%15.6</span></div></div>
+                        <div class="stock-perf-row"><span class="stock-name">ASTOR</span><div class="perf-badges"><span class="perf-bh">%-21.6</span><span class="perf-algo-win">+%40.9</span></div></div>
+                        <div class="stock-perf-row"><span class="stock-name">CIMSA</span><div class="perf-badges"><span class="perf-bh">%-26.8</span><span class="perf-algo-win">+%15.6</span></div></div>
+                        <div class="stock-perf-row"><span class="stock-name">ASELS</span><div class="perf-badges"><span class="perf-bh">%-11.0</span><span class="perf-algo-win">+%16.9</span></div></div>
+                        <div class="stock-perf-row"><span class="stock-name">BIMAS</span><div class="perf-badges"><span class="perf-bh">+%3.3</span><span class="perf-algo-win">+%15.6</span></div></div>
+                        <div class="stock-perf-row"><span class="stock-name">BRSAN</span><div class="perf-badges"><span class="perf-bh">+%23.5</span><span class="perf-algo-win">+%20.3</span></div></div>
+                        <div class="stock-perf-row"><span class="stock-name">ALARK</span><div class="perf-badges"><span class="perf-bh">+%16.7</span><span class="perf-algo-loss">+%4.6</span></div></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2 Yıllık Test -->
+            <div class="col-md-6">
+                <div class="info-card">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <h4 class="mb-0" style="color: var(--accent);">Son 2 Yıl (Makro Vade)</h4>
+                        <i class="bi bi-calendar-check fs-4" style="color: var(--text-muted);"></i>
+                    </div>
+                    <p class="desc-text">Büyük boğa rallileri ve sert enflasyonist çöküşleri içeren yaklaşık 500 işlem gününde trend sürme motorunun agresif büyüme tablosu.</p>
+                    
+                    <div class="stat-box">
+                        <span class="stat-label">Piyasayı Yenme Başarısı</span>
+                        <span class="stat-value text-white">23 / 29 Varlık</span>
+                    </div>
+                    <div class="stat-box" style="margin-bottom: 5px;">
+                        <span class="stat-label">BİST30 Ortalama vs Algoritma</span>
+                        <span class="stat-value"><span style="color: #f4f4f5;">+%42.44</span> <span style="color: var(--text-muted); font-weight:400;">|</span> <span class="stat-win">+%94.16</span></span>
+                    </div>
+
+                    <div class="scrollable-stock-list mt-3">
+                        <div style="font-size: 0.7rem; color: var(--text-muted); text-align: right; margin-bottom: 5px; padding-right: 5px;">AL-BEKLE vs ALGORİTMA</div>
+                        <div class="stock-perf-row"><span class="stock-name">KONTR</span><div class="perf-badges"><span class="perf-bh">%-96.2</span><span class="perf-algo-win">+%73.1</span></div></div>
+                        <div class="stock-perf-row"><span class="stock-name">SASA</span><div class="perf-badges"><span class="perf-bh">%-57.6</span><span class="perf-algo-win">+%92.9</span></div></div>
+                        <div class="stock-perf-row"><span class="stock-name">ASELS</span><div class="perf-badges"><span class="perf-bh">+%453.9</span><span class="perf-algo-loss">+%419.1</span></div></div>
+                        <div class="stock-perf-row"><span class="stock-name">AKBNK</span><div class="perf-badges"><span class="perf-bh">+%42.0</span><span class="perf-algo-win">+%92.4</span></div></div>
+                        <div class="stock-perf-row"><span class="stock-name">ASTOR</span><div class="perf-badges"><span class="perf-bh">+%130.6</span><span class="perf-algo-win">+%172.2</span></div></div>
+                        <div class="stock-perf-row"><span class="stock-name">BRSAN</span><div class="perf-badges"><span class="perf-bh">+%34.0</span><span class="perf-algo-win">+%150.0</span></div></div>
+                        <div class="stock-perf-row"><span class="stock-name">TUPRS</span><div class="perf-badges"><span class="perf-bh">+%184.9</span><span class="perf-algo-win">+%213.9</span></div></div>
+                        <div class="stock-perf-row"><span class="stock-name">ALARK</span><div class="perf-badges"><span class="perf-bh">+%26.9</span><span class="perf-algo-win">+%49.2</span></div></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- 3. BÖLÜM: MİMARİ -->
     <div id="about" class="section-panel">
-        <div class="text-center mb-5"><h2 class="header-title">Sistem Mimarisi</h2></div>
+        <div class="text-center mb-5">
+            <h2 class="header-title">Sistem Mimarisi</h2>
+            <p class="header-subtitle">Duyguları devreden çıkaran 3 katmanlı algoritmik yapı.</p>
+        </div>
+
         <div class="row g-4">
             <div class="col-md-4">
                 <div class="info-card">
-                    <i class="bi bi-shield-check info-icon"></i><h4>Ayı Piyasası Koruması</h4>
-                    <p class="desc-text mb-0">Fiyat 200 Günlük Üstel Hareketli Ortalamanın (EMA 200) altındayken hiçbir alım sinyali onaylanmaz.</p>
+                    <i class="bi bi-shield-check info-icon"></i>
+                    <h4>Ayı Piyasası Koruması</h4>
+                    <p class="desc-text mb-0">Fiyat 200 Günlük Üstel Hareketli Ortalamanın (EMA 200) altındayken hiçbir alım sinyali onaylanmaz. Düşen varlıklarda sermaye çöküşten korunur.</p>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="info-card">
-                    <i class="bi bi-graph-up info-icon"></i><h4>Dinamik Trend Sürme</h4>
-                    <p class="desc-text mb-0">Erken kâr alımları veya dar stoplar kullanılmaz. Sistem trend bitene kadar pozisyonda kalır.</p>
+                    <i class="bi bi-graph-up info-icon"></i>
+                    <h4>Dinamik Trend Sürme</h4>
+                    <p class="desc-text mb-0">Erken kâr alımları veya dar stoplar kullanılmaz. Sistem; MACD, SuperTrend ve EMA kesişimlerini optimize eder ve trend bitene kadar pozisyonda kalır.</p>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="info-card">
-                    <i class="bi bi-wallet2 info-icon"></i><h4>PPF Nakit Entegrasyonu</h4>
-                    <p class="desc-text mb-0">Algoritma, açıkta kalan bakiyeyi otonom olarak Para Piyasası Fonlarında (PPF) değerlendirir.</p>
+                    <i class="bi bi-wallet2 info-icon"></i>
+                    <h4>PPF Nakit Entegrasyonu</h4>
+                    <p class="desc-text mb-0">Riskli varlıklardan çıkıldığında nakit boşta beklemez. Algoritma, açıkta kalan bakiyeyi otonom olarak Para Piyasası Fonlarında (PPF) değerlendirir.</p>
                 </div>
             </div>
         </div>
+        
+        <div class="info-card mt-4">
+            <div class="d-flex align-items-center mb-3">
+                <i class="bi bi-cpu info-icon mb-0 me-3"></i>
+                <h4 class="mb-0">Makine Öğrenmesi & Grid Search</h4>
+            </div>
+            <p class="desc-text mb-0">Her varlığın farklı bir fiyatlama DNA'sı vardır. Otonom sistem, her akşam piyasa kapandıktan sonra varlıkları binlerce farklı indikatör kombinasyonuyla (Grid Search) geriye dönük test eder. Ekranda görülen veriler, o varlığın matematiksel olarak en kârlı olduğu "Şampiyon" stratejinin anlık sinyalidir.</p>
+        </div>
     </div>
 
-    <!-- 4. BÖLÜM: İLETİŞİM (GÜNCELLENMİŞ BİLGİLERLE) -->
+    <!-- 4. BÖLÜM: İLETİŞİM -->
     <div id="contact" class="section-panel">
         <div class="profile-card text-center mt-4">
             <h2 class="mb-1" style="font-weight: 700;">Emir Çanakkale</h2>
@@ -279,7 +380,7 @@
             </p>
             
             <div class="d-flex justify-content-center flex-wrap gap-2">
-                <a href="https://www.linkedin.com/in/emir-çanakkale" target="_blank" class="social-btn">
+                <a href="https://www.linkedin.com/in/emir-%C3%e7anakkale" target="_blank" class="social-btn">
                     <i class="bi bi-linkedin me-2"></i> LinkedIn
                 </a>
                 <a href="https://github.com/Emrcnkkl" target="_blank" class="social-btn">
@@ -386,7 +487,7 @@
         const tbody = document.getElementById('signalTableBody');
         tbody.innerHTML = ""; 
         if(dataArray.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-muted">Kriterlere uygun hisse bulunamadı.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">Kriterlere uygun hisse bulunamadı.</td></tr>`;
             return;
         }
         dataArray.forEach((item) => {
@@ -399,6 +500,7 @@
                 <td>${signalHtml}</td>
                 <td class="font-mono">${item.fiyat} ₺</td>
                 <td><span class="strategy-badge">${item.strateji}</span></td>
+                <td style="color: var(--text-muted); font-size: 0.85rem;">${item.stop}</td>
                 <td class="text-end" style="padding-right: 30px;">${getiriHtml}</td>
             </tr>`;
         });
@@ -496,7 +598,7 @@
             filterTable();
             startOnboardingTour();
         } catch (error) {
-            document.getElementById('signalTableBody').innerHTML = `<tr><td colspan="5" class="text-center py-4" style="color: var(--text-muted);"><i class="bi bi-cloud-slash fs-3 d-block mb-2"></i>Sinyaller şu an yüklenemiyor.</td></tr>`;
+            document.getElementById('signalTableBody').innerHTML = `<tr><td colspan="6" class="text-center py-4" style="color: var(--text-muted);"><i class="bi bi-cloud-slash fs-3 d-block mb-2"></i>Sinyaller şu an yüklenemiyor.</td></tr>`;
         }
     }
 
