@@ -1,11 +1,11 @@
 {
-    "guncellenme_tarihi": "21.10.2026 22:17",
+    "guncellenme_tarihi": "22.10.2026 18:59",
     "sinyaller": [
         {
             "hisse": "AKBNK",
-            "sinyal": "TUT",
-            "fiyat": 67.2,
-            "ema200": 69.94,
+            "sinyal": "SAT",
+            "fiyat": 64.6,
+            "ema200": 69.88,
             "strateji": "MACD (H:8/Y:21)",
             "stop": "Trend Çıkışı",
             "getiri": 92.4
@@ -13,8 +13,8 @@
         {
             "hisse": "ALARK",
             "sinyal": "TUT",
-            "fiyat": 104.3,
-            "ema200": 101.03,
+            "fiyat": 102.8,
+            "ema200": 101.04,
             "strateji": "EMA Kesişim (13/34)",
             "stop": "Trend Çıkışı",
             "getiri": 49.2
@@ -22,8 +22,8 @@
         {
             "hisse": "ASELS",
             "sinyal": "TUT",
-            "fiyat": 345.75,
-            "ema200": 340.1,
+            "fiyat": 338.25,
+            "ema200": 340.08,
             "strateji": "EMA Kesişim (13/34)",
             "stop": "Trend Çıkışı",
             "getiri": 417.1
@@ -31,8 +31,8 @@
         {
             "hisse": "ASTOR",
             "sinyal": "TUT",
-            "fiyat": 156.6,
-            "ema200": 235.61,
+            "fiyat": 150.0,
+            "ema200": 234.75,
             "strateji": "EMA Kesişim (21/50)",
             "stop": "Trend Çıkışı",
             "getiri": 172.2
@@ -40,17 +40,17 @@
         {
             "hisse": "BIMAS",
             "sinyal": "TUT",
-            "fiyat": 385.5,
-            "ema200": 367.56,
+            "fiyat": 369.0,
+            "ema200": 367.57,
             "strateji": "SuperTrend (P:10/Ç:3.0)",
             "stop": "Trend Çıkışı",
             "getiri": 28.7
         },
         {
             "hisse": "BRSAN",
-            "sinyal": "SAT",
-            "fiyat": 646.5,
-            "ema200": 595.72,
+            "sinyal": "TUT",
+            "fiyat": 636.0,
+            "ema200": 596.12,
             "strateji": "MACD (H:12/Y:26)",
             "stop": "Trend Çıkışı",
             "getiri": 134.1
@@ -58,17 +58,17 @@
         {
             "hisse": "CIMSA",
             "sinyal": "TUT",
-            "fiyat": 39.56,
-            "ema200": 46.42,
-            "strateji": "SuperTrend (P:14/Ç:2.0)",
+            "fiyat": 38.54,
+            "ema200": 46.35,
+            "strateji": "MACD (H:8/Y:21)",
             "stop": "Trend Çıkışı",
-            "getiri": 48.1
+            "getiri": 51.8
         },
         {
             "hisse": "CWENE",
             "sinyal": "TUT",
-            "fiyat": 15.11,
-            "ema200": 30.28,
+            "fiyat": 15.0,
+            "ema200": 30.12,
             "strateji": "SuperTrend (P:10/Ç:3.0)",
             "stop": "Trend Çıkışı",
             "getiri": 101.8
@@ -76,8 +76,8 @@
         {
             "hisse": "DOAS",
             "sinyal": "TUT",
-            "fiyat": 132.5,
-            "ema200": 164.56,
+            "fiyat": 129.3,
+            "ema200": 164.21,
             "strateji": "MACD (H:8/Y:21)",
             "stop": "Trend Çıkışı",
             "getiri": 76.3
@@ -85,35 +85,35 @@
         {
             "hisse": "EKGYO",
             "sinyal": "TUT",
-            "fiyat": 18.57,
-            "ema200": 19.6,
+            "fiyat": 17.75,
+            "ema200": 19.59,
             "strateji": "SuperTrend (P:10/Ç:3.0)",
             "stop": "Trend Çıkışı",
-            "getiri": 50.4
+            "getiri": 46.0
         },
         {
             "hisse": "ENKAI",
             "sinyal": "TUT",
-            "fiyat": 75.8,
-            "ema200": 86.03,
+            "fiyat": 73.5,
+            "ema200": 85.9,
             "strateji": "EMA Kesişim (21/50)",
             "stop": "Trend Çıkışı",
-            "getiri": 79.8
+            "getiri": 86.5
         },
         {
             "hisse": "EREGL",
             "sinyal": "TUT",
-            "fiyat": 36.52,
+            "fiyat": 35.1,
             "ema200": 35.24,
             "strateji": "EMA Kesişim (21/50)",
             "stop": "Trend Çıkışı",
-            "getiri": 72.3
+            "getiri": 69.5
         },
         {
             "hisse": "EUPWR",
             "sinyal": "TUT",
-            "fiyat": 39.06,
-            "ema200": 62.71,
+            "fiyat": 37.62,
+            "ema200": 62.46,
             "strateji": "SuperTrend (P:20/Ç:2.0)",
             "stop": "Trend Çıkışı",
             "getiri": 195.0
@@ -121,26 +121,26 @@
         {
             "hisse": "FROTO",
             "sinyal": "TUT",
-            "fiyat": 66.85,
-            "ema200": 85.48,
+            "fiyat": 66.55,
+            "ema200": 85.3,
             "strateji": "MACD (H:8/Y:21)",
             "stop": "Trend Çıkışı",
-            "getiri": 87.4
+            "getiri": 90.4
         },
         {
             "hisse": "GARAN",
             "sinyal": "TUT",
-            "fiyat": 132.6,
-            "ema200": 131.64,
+            "fiyat": 128.5,
+            "ema200": 131.6,
             "strateji": "MACD (H:24/Y:52)",
             "stop": "Trend Çıkışı",
-            "getiri": 27.2
+            "getiri": 29.0
         },
         {
             "hisse": "GUBRF",
             "sinyal": "TUT",
-            "fiyat": 354.5,
-            "ema200": 432.96,
+            "fiyat": 331.5,
+            "ema200": 431.95,
             "strateji": "MACD (H:12/Y:26)",
             "stop": "Trend Çıkışı",
             "getiri": 174.8
@@ -148,17 +148,17 @@
         {
             "hisse": "HEKTS",
             "sinyal": "TUT",
-            "fiyat": 1.89,
-            "ema200": 3.06,
+            "fiyat": 1.83,
+            "ema200": 3.04,
             "strateji": "MACD (H:8/Y:21)",
             "stop": "Trend Çıkışı",
             "getiri": 85.5
         },
         {
             "hisse": "ISCTR",
-            "sinyal": "TUT",
-            "fiyat": 12.87,
-            "ema200": 13.41,
+            "sinyal": "SAT",
+            "fiyat": 12.42,
+            "ema200": 13.4,
             "strateji": "MACD (H:8/Y:21)",
             "stop": "Trend Çıkışı",
             "getiri": 75.0
@@ -166,17 +166,17 @@
         {
             "hisse": "KCHOL",
             "sinyal": "TUT",
-            "fiyat": 203.3,
-            "ema200": 198.24,
-            "strateji": "SuperTrend (P:14/Ç:2.0)",
+            "fiyat": 196.1,
+            "ema200": 198.22,
+            "strateji": "SuperTrend (P:20/Ç:2.0)",
             "stop": "Trend Çıkışı",
-            "getiri": 45.6
+            "getiri": 51.7
         },
         {
             "hisse": "KONTR",
             "sinyal": "TUT",
-            "fiyat": 1.49,
-            "ema200": 8.18,
+            "fiyat": 1.38,
+            "ema200": 8.11,
             "strateji": "SuperTrend (P:20/Ç:2.0)",
             "stop": "Trend Çıkışı",
             "getiri": 73.1
@@ -184,8 +184,8 @@
         {
             "hisse": "KRDMD",
             "sinyal": "TUT",
-            "fiyat": 42.04,
-            "ema200": 38.65,
+            "fiyat": 39.88,
+            "ema200": 38.67,
             "strateji": "MACD (H:12/Y:26)",
             "stop": "Trend Çıkışı",
             "getiri": 37.2
@@ -193,8 +193,8 @@
         {
             "hisse": "ODAS",
             "sinyal": "TUT",
-            "fiyat": 4.88,
-            "ema200": 6.8,
+            "fiyat": 4.69,
+            "ema200": 6.78,
             "strateji": "SuperTrend (P:10/Ç:3.0)",
             "stop": "Trend Çıkışı",
             "getiri": 73.7
@@ -202,8 +202,8 @@
         {
             "hisse": "PGSUS",
             "sinyal": "TUT",
-            "fiyat": 129.3,
-            "ema200": 170.19,
+            "fiyat": 126.4,
+            "ema200": 169.75,
             "strateji": "SuperTrend (P:14/Ç:2.0)",
             "stop": "Trend Çıkışı",
             "getiri": 49.1
@@ -211,8 +211,8 @@
         {
             "hisse": "SAHOL",
             "sinyal": "TUT",
-            "fiyat": 88.15,
-            "ema200": 90.8,
+            "fiyat": 87.55,
+            "ema200": 90.77,
             "strateji": "MACD (H:12/Y:26)",
             "stop": "Trend Çıkışı",
             "getiri": 41.6
@@ -220,8 +220,8 @@
         {
             "hisse": "SASA",
             "sinyal": "TUT",
-            "fiyat": 1.66,
-            "ema200": 2.54,
+            "fiyat": 1.64,
+            "ema200": 2.53,
             "strateji": "SuperTrend (P:20/Ç:2.0)",
             "stop": "Trend Çıkışı",
             "getiri": 92.9
@@ -229,8 +229,8 @@
         {
             "hisse": "SISE",
             "sinyal": "TUT",
-            "fiyat": 35.26,
-            "ema200": 41.33,
+            "fiyat": 34.08,
+            "ema200": 41.26,
             "strateji": "SuperTrend (P:20/Ç:2.0)",
             "stop": "Trend Çıkışı",
             "getiri": 91.7
@@ -238,38 +238,38 @@
         {
             "hisse": "TCELL",
             "sinyal": "TUT",
-            "fiyat": 95.0,
-            "ema200": 103.57,
+            "fiyat": 93.3,
+            "ema200": 103.46,
             "strateji": "MACD (H:12/Y:26)",
             "stop": "Trend Çıkışı",
-            "getiri": 19.7
+            "getiri": 19.8
         },
         {
             "hisse": "THYAO",
             "sinyal": "TUT",
-            "fiyat": 265.0,
-            "ema200": 300.88,
-            "strateji": "MACD (H:8/Y:21)",
+            "fiyat": 259.0,
+            "ema200": 300.46,
+            "strateji": "SuperTrend (P:10/Ç:3.0)",
             "stop": "Trend Çıkışı",
-            "getiri": 33.0
+            "getiri": 31.4
         },
         {
             "hisse": "TUPRS",
             "sinyal": "TUT",
-            "fiyat": 359.25,
-            "ema200": 291.91,
+            "fiyat": 352.25,
+            "ema200": 292.51,
             "strateji": "MACD (H:8/Y:21)",
             "stop": "Trend Çıkışı",
             "getiri": 231.2
         },
         {
             "hisse": "YKBNK",
-            "sinyal": "TUT",
-            "fiyat": 36.42,
+            "sinyal": "SAT",
+            "fiyat": 35.32,
             "ema200": 35.74,
             "strateji": "MACD (H:8/Y:21)",
             "stop": "Trend Çıkışı",
-            "getiri": 31.0
+            "getiri": 26.9
         }
     ]
 }
