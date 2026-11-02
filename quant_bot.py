@@ -7,14 +7,26 @@ from datetime import datetime, timedelta
 
 warnings.filterwarnings('ignore')
 
-bist30 = [
+PORTFOY_BASLANGIC_TARIHI = "2026-10-21"
+BASLANGIC_SERMAYE = 100000.0
+PPF_GUNLUK_GETIRI = 0.0011
+KOMISYON = 0.002
+
+# Gram Altın + BIST100 Hisseleri
+bist100 = [
     "GRAM_ALTIN",
-    "AKBNK.IS", "ALARK.IS", "ASELS.IS", "ASTOR.IS", "BIMAS.IS",
-    "BRSAN.IS", "CIMSA.IS", "CWENE.IS", "DOAS.IS", "EKGYO.IS",
-    "ENKAI.IS", "EREGL.IS", "EUPWR.IS", "FROTO.IS", "GARAN.IS",
-    "GUBRF.IS", "HEKTS.IS", "ISCTR.IS", "KCHOL.IS", "KONTR.IS",
-    "KOZAL.IS", "KRDMD.IS", "ODAS.IS", "PGSUS.IS", "SAHOL.IS",
-    "SASA.IS", "SISE.IS", "TCELL.IS", "THYAO.IS", "TUPRS.IS", "YKBNK.IS"
+    "AEFES.IS", "AGHOL.IS", "AGROT.IS", "AHGAZ.IS", "AKBNK.IS", "AKCNS.IS", "AKFGY.IS", "AKFYE.IS", "AKSA.IS", "AKSEN.IS",
+    "ALARK.IS", "ALBRK.IS", "ALFAS.IS", "ALTNY.IS", "ANHYT.IS", "ANSGR.IS", "ARCLK.IS", "ARDYZ.IS", "ASELS.IS", "ASTOR.IS",
+    "BERA.IS", "BFREN.IS", "BIENY.IS", "BIMAS.IS", "BIOEN.IS", "BOBET.IS", "BRSAN.IS", "BRYAT.IS", "BTCIM.IS", "CANTE.IS",
+    "CCOLA.IS", "CIMSA.IS", "CLEBI.IS", "CWENE.IS", "DOAS.IS", "DOHOL.IS", "ECILC.IS", "ECZYT.IS", "EGEEN.IS", "EKGYO.IS",
+    "ENERY.IS", "ENJSA.IS", "ENKAI.IS", "EREGL.IS", "EUPWR.IS", "EUREN.IS", "FROTO.IS", "GARAN.IS", "GENIL.IS", "GESAN.IS",
+    "GOLTS.IS", "GUBRF.IS", "GWIND.IS", "HALKB.IS", "HEKTS.IS", "IMASM.IS", "IPEKE.IS", "ISCTR.IS", "ISDMR.IS", "ISGYO.IS",
+    "ISMEN.IS", "IZENR.IS", "KAYSE.IS", "KCAER.IS", "KCHOL.IS", "KLSER.IS", "KONTR.IS", "KONYA.IS", "KOZAA.IS", "KOZAL.IS",
+    "KRDMD.IS", "KTLEV.IS", "LMKDC.IS", "MAVI.IS", "MGROS.IS", "MIATK.IS", "ODAS.IS", "OTKAR.IS", "OYAKC.IS", "PAPIL.IS",
+    "PEKGY.IS", "PETKM.IS", "PGSUS.IS", "QUAGR.IS", "REEDR.IS", "SAHOL.IS", "SASA.IS", "SDTTR.IS", "SISE.IS", "SKBNK.IS",
+    "SMRTG.IS", "SOKM.IS", "TABGD.IS", "TAVHL.IS", "TCELL.IS", "THYAO.IS", "TKFEN.IS", "TOASO.IS", "TSKB.IS", "TTKOM.IS",
+    "TTRAK.IS", "TUKAS.IS", "TUPRS.IS", "TURSG.IS", "ULKER.IS", "VAKBN.IS", "VESBE.IS", "VESTL.IS", "YEOTK.IS", "YKBNK.IS",
+    "YYLGD.IS", "ZOREN.IS"
 ]
 
 def hesapla_macd(df, hizli, yavas, sinyal_periyot=9):
@@ -103,58 +115,61 @@ def backtest_saf_trend(df):
     baslangic = 100.0
     nakit = baslangic
     hisse_adedi = 0.0
-    komisyon = 0.002
-    PPF_GUNLUK_GETIRI = 0.0011
 
     fiyatlar = df['Close'].values
     durumlar = df['Durum'].values
     ema200ler = df['EMA200'].values
+    n = len(df)
+    bakiye_serisi = np.full(n, baslangic, dtype=float)
 
-    for i in range(len(df)):
+    for i in range(n):
         fiyat = fiyatlar[i]
         durum = durumlar[i]
         ema200 = ema200ler[i]
 
         if np.isnan(durum) or np.isnan(ema200):
+            if i > 0:
+                bakiye_serisi[i] = bakiye_serisi[i - 1]
             continue
 
         if nakit > 0:
             nakit *= (1.0 + PPF_GUNLUK_GETIRI)
 
-        # İndikatör pozitif trenddeyse ve fiyat EMA200 üzerindeyse alım yap
+        # Pozisyona giriş
         if durum == 1 and nakit > 0 and fiyat > ema200:
-            hisse_adedi = (nakit * (1.0 - komisyon)) / fiyat
+            hisse_adedi = (nakit * (1.0 - KOMISYON)) / fiyat
             nakit = 0.0
 
-        # İndikatör negatif trende dönerse sat ve nakite (PPF) geç
+        # Pozisyondan çıkış
         elif durum == -1 and hisse_adedi > 0:
             satis_tutari = hisse_adedi * fiyat
-            nakit = satis_tutari * (1.0 - komisyon)
+            nakit = satis_tutari * (1.0 - KOMISYON)
             hisse_adedi = 0.0
 
-    if hisse_adedi > 0:
-        son_fiyat = fiyatlar[-1]
-        nakit = (hisse_adedi * son_fiyat) * (1.0 - komisyon)
+        # O günkü toplam portföy ederi
+        bakiye_serisi[i] = nakit if nakit > 0 else (hisse_adedi * fiyat)
 
-    return ((nakit - baslangic) / baslangic) * 100.0
+    son_deger = nakit if nakit > 0 else (hisse_adedi * fiyatlar[-1] * (1.0 - KOMISYON))
+    skor = ((son_deger - baslangic) / baslangic) * 100.0
+    return skor, pd.Series(bakiye_serisi, index=df.index)
 
-site_verileri = []
 macd_ayarlari = [(8, 21), (12, 26), (24, 52)]
 st_ayarlari = [(10, 3.0), (14, 2.0), (20, 2.0)]
 ema_ayarlari = [(9, 21), (13, 34), (21, 50)]
 
-print("⏳ Web Sitesi İçin Güncel Sinyaller Hesaplanıyor...")
+print("⏳ BIST100 ve Gram Altın Verileri Paralel İndiriliyor...")
 
-for hisse in bist30:
+normal_hisseler = [h for h in bist100 if h != "GRAM_ALTIN"]
+toplu_veri = yf.download(normal_hisseler + ["GC=F", "TRY=X"], period="3y", interval="1d", group_by='ticker', progress=False, threads=True)
+
+site_verileri = []
+portfoy_egrileri = []
+
+for hisse in bist100:
     try:
         if hisse == "GRAM_ALTIN":
-            ons_df = yf.download("GC=F", period="3y", interval="1d", progress=False)
-            usd_df = yf.download("TRY=X", period="3y", interval="1d", progress=False)
-
-            if isinstance(ons_df.columns, pd.MultiIndex):
-                ons_df.columns = ons_df.columns.get_level_values(0)
-            if isinstance(usd_df.columns, pd.MultiIndex):
-                usd_df.columns = usd_df.columns.get_level_values(0)
+            ons_df = toplu_veri["GC=F"].copy()
+            usd_df = toplu_veri["TRY=X"].copy()
 
             ortak = pd.concat([
                 pd.to_numeric(ons_df['Close'].squeeze()),
@@ -168,21 +183,18 @@ for hisse in bist30:
             df['Close'] = (ortak['Ons_Close'] * ortak['UsdTry']) / 31.1034768
             df['High'] = (ortak['Ons_High'] * ortak['UsdTry']) / 31.1034768
             df['Low'] = (ortak['Ons_Low'] * ortak['UsdTry']) / 31.1034768
-
         else:
-            df = yf.download(hisse, period="3y", interval="1d", progress=False)
-            if len(df) < 250:
+            if hisse not in toplu_veri.columns.levels[0]:
                 continue
-
-            if isinstance(df.columns, pd.MultiIndex):
-                df.columns = df.columns.get_level_values(0)
-
+            df = toplu_veri[hisse].copy()
             df['Close'] = pd.to_numeric(df['Close'].squeeze())
-            df['High'] = pd.to_numeric(df.get('High', df['Close']).squeeze())
-            df['Low'] = pd.to_numeric(df.get('Low', df['Close']).squeeze())
-            df.dropna(subset=['Close'], inplace=True)
+            df['High'] = pd.to_numeric(df['High'].squeeze())
+            df['Low'] = pd.to_numeric(df['Low'].squeeze())
+            df.dropna(subset=['Close', 'High', 'Low'], inplace=True)
 
-        # Her iki blok (GRAM_ALTIN ve BIST30) için ortak hesaplama
+        if len(df) < 250:
+            continue
+
         df['EMA200'] = df['Close'].ewm(span=200, adjust=False).mean()
         test_verisi = df.tail(500).copy()
 
@@ -190,45 +202,48 @@ for hisse in bist30:
         en_iyi_isim = ""
         en_iyi_param = ""
         en_iyi_df = None
+        en_iyi_egri = None
 
         for h, y in macd_ayarlari:
             t_df = hesapla_macd(test_verisi, h, y)
-            skor = backtest_saf_trend(t_df)
+            skor, egri = backtest_saf_trend(t_df)
             if skor > en_iyi_skor:
                 en_iyi_skor = skor
                 en_iyi_isim = "MACD"
                 en_iyi_param = f"H:{h}/Y:{y}"
-                en_iyi_df = t_df.copy()
+                en_iyi_df = t_df
+                en_iyi_egri = egri
 
         for p, c in st_ayarlari:
             t_df = hesapla_supertrend(test_verisi, p, c)
-            skor = backtest_saf_trend(t_df)
+            skor, egri = backtest_saf_trend(t_df)
             if skor > en_iyi_skor:
                 en_iyi_skor = skor
                 en_iyi_isim = "SuperTrend"
                 en_iyi_param = f"P:{p}/Ç:{c}"
-                en_iyi_df = t_df.copy()
+                en_iyi_df = t_df
+                en_iyi_egri = egri
 
         for kisa, uzun in ema_ayarlari:
             t_df = hesapla_ema_cross(test_verisi, kisa, uzun)
-            skor = backtest_saf_trend(t_df)
+            skor, egri = backtest_saf_trend(t_df)
             if skor > en_iyi_skor:
                 en_iyi_skor = skor
                 en_iyi_isim = "EMA Kesişim"
                 en_iyi_param = f"{kisa}/{uzun}"
-                en_iyi_df = t_df.copy()
+                en_iyi_df = t_df
+                en_iyi_egri = egri
 
         if en_iyi_df is not None:
             son_satir = en_iyi_df.iloc[-1]
             onceki_satir = en_iyi_df.iloc[-2]
-            
+
             sinyal_kodu = son_satir['Sinyal']
             durum_kodu = son_satir['Durum']
             fiyat = float(son_satir['Close'])
             ema200 = float(son_satir['EMA200'])
             stop_fiyat = float(son_satir['Stop_Seviyesi'])
 
-            # Sinyal ve Pozisyon Durumu Mantığı
             yeni_ema_kirilimi = (durum_kodu == 1 and fiyat > ema200 and onceki_satir['Close'] <= onceki_satir['EMA200'])
             if (sinyal_kodu == 1 and fiyat > ema200) or yeni_ema_kirilimi:
                 sinyal_yazi = "AL"
@@ -239,6 +254,11 @@ for hisse in bist30:
             else:
                 sinyal_yazi = "İZLE"
 
+            # X-Ray Grafiği için son 30 işlem gününün gerçek kapanışları ve tarihleri
+            son_30_df = en_iyi_df.tail(30)
+            gecmis_fiyatlar = [round(float(x), 2) for x in son_30_df['Close'].values]
+            gecmis_tarihler = [d.strftime("%d.%m") for d in son_30_df.index]
+
             site_verileri.append({
                 "hisse": hisse.replace(".IS", ""),
                 "sinyal": sinyal_yazi,
@@ -246,18 +266,54 @@ for hisse in bist30:
                 "ema200": round(ema200, 2),
                 "strateji": f"{en_iyi_isim} ({en_iyi_param})",
                 "stop": f"{round(stop_fiyat, 2)} TL" if stop_fiyat > 0 else "Trend Çıkışı",
-                "getiri": round(en_iyi_skor, 1)
+                "getiri": round(en_iyi_skor, 1),
+                "gecmis": gecmis_fiyatlar,
+                "tarihler": gecmis_tarihler
             })
 
+            if en_iyi_egri is not None:
+                portfoy_egrileri.append(en_iyi_egri)
+
     except Exception as e:
-        print(f"⚠️ {hisse} hesaplanırken hata oluştu: {e}")
+        print(f"⚠️ {hisse} hesaplanırken hata: {e}")
+
+# GERÇEK 100.000 TL FON HESABI (21 Ekim 2026'dan Bugüne)
+guncel_bakiye = BASLANGIC_SERMAYE
+net_kar_yuzde = 0.0
+net_kar_tl = 0.0
+
+if portfoy_egrileri:
+    birlesik_egri_df = pd.concat(portfoy_egrileri, axis=1).ffill().bfill()
+    canli_donem_df = birlesik_egri_df[birlesik_egri_df.index >= PORTFOY_BASLANGIC_TARIHI]
+
+    if len(canli_donem_df) >= 1:
+        # Başlangıç gününü 1.0 kabul edip tüm varlıkların eşit ağırlıklı gerçek büyümesini al
+        normalize_df = canli_donem_df.div(canli_donem_df.iloc[0], axis=1)
+        portfoy_serisi = normalize_df.mean(axis=1) * BASLANGIC_SERMAYE
+        guncel_bakiye = float(portfoy_serisi.iloc[-1])
+        net_kar_tl = guncel_bakiye - BASLANGIC_SERMAYE
+        net_kar_yuzde = ((guncel_bakiye - BASLANGIC_SERMAYE) / BASLANGIC_SERMAYE) * 100.0
+
+aktif_pozisyon_sayisi = sum(1 for x in site_verileri if x['sinyal'] in ['AL', 'TUT'])
+toplam_varlik_sayisi = len(site_verileri)
+nakit_orani = round(((toplam_varlik_sayisi - aktif_pozisyon_sayisi) / max(1, toplam_varlik_sayisi)) * 100, 1)
 
 veri_paketi = {
     "guncellenme_tarihi": (datetime.utcnow() + timedelta(hours=3)).strftime("%d.%m.%Y %H:%M"),
+    "portfoy": {
+        "baslangic_tarihi": "21 Ekim 2026",
+        "baslangic_sermaye": round(BASLANGIC_SERMAYE, 2),
+        "guncel_bakiye": round(guncel_bakiye, 2),
+        "net_kar_tl": round(net_kar_tl, 2),
+        "net_kar_yuzde": round(net_kar_yuzde, 2),
+        "aktif_pozisyon": aktif_pozisyon_sayisi,
+        "toplam_varlik": toplam_varlik_sayisi,
+        "ppf_nakit_orani": nakit_orani
+    },
     "sinyaller": site_verileri
 }
 
 with open("signals.json", "w", encoding="utf-8") as f:
     json.dump(veri_paketi, f, ensure_ascii=False, indent=4)
 
-print(f"✅ Kurumsal Fon Algoritması {len(site_verileri)} varlık için signals.json dosyasını güncelledi!")
+print(f"✅ BIST100 Algoritması {toplam_varlik_sayisi} varlık ve gerçek portföy verisiyle signals.json dosyasını güncelledi!")
