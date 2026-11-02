@@ -193,7 +193,7 @@
                 <i class="bi bi-graph-up-arrow me-1"></i> Hesaplanıyor...
             </div>
             <div style="font-size: 0.85rem; color: var(--text-muted);">
-                <i class="bi bi-rocket-takeoff me-1"></i> Başlangıç: <span id="portfolioStartDate">21 Ekim 2026</span> (100.000 ₺) | Güncelleme: <span id="lastUpdate">Bekleniyor...</span><br><span style="font-size:0.75rem;">Eşit ağırlıklı simülasyon. Strateji her gece yeniden seçildiği için geçmiş günler de yeniden hesaplanır.</span>
+                <i class="bi bi-rocket-takeoff me-1"></i> Başlangıç: <span id="portfolioStartDate">21 Ekim 2026</span> (100.000 ₺) | Güncelleme: <span id="lastUpdate">Bekleniyor...</span><br><span style="font-size:0.75rem;">Eşit ağırlıklı simülasyon. İşlemler ertesi gün açılış fiyatıyla, %0,2 komisyonla kaydedilir ve sonradan değiştirilmez.</span>
             </div>
             <div class="portfolio-Allocation-badges">
                 <span class="alloc-badge" id="activePosBadge"><i class="bi bi-activity me-1 text-primary"></i> Aktif Trend: - Varlık</span>
@@ -223,7 +223,7 @@
                             <th>Son Kapanış</th>
                             <th>Şampiyon Strateji</th>
                             <th>ATR İz Süren Stop</th>
-                            <th class="text-end" style="padding-right: 30px;">2 Yıllık Getiri (Al-Bekle)</th>
+                            <th class="text-end" style="padding-right: 30px;">2 Yıl Backtest (Al-Bekle)</th>
                         </tr>
                     </thead>
                     <tbody id="signalTableBody">
@@ -235,6 +235,10 @@
                 <i class="bi bi-hand-index-thumb"></i> Son 30 günlük gerçek fiyat grafiğini, Max Drawdown ve ADX metriklerini incelemek için varlıkların üzerine tıklayın.
             </div>
         </div>
+        <div class="info-card mt-4" style="padding: 20px;"><h4 class="mb-1">Model portföy işlem geçmişi</h4>
+            <p class="desc-text mb-3" style="font-size: 0.82rem;">İşlemler ertesi gün açılış fiyatıyla, %0,2 komisyonla kaydedilir ve sonradan değiştirilmez.</p>
+            <div class="table-responsive"><table class="custom-table"><thead><tr><th>Tarih</th><th>Varlık</th><th>İşlem</th><th>Fiyat</th><th>Sonuç</th></tr></thead>
+            <tbody id="historyBody"><tr><td colspan="5" class="text-center py-3 text-muted">Henüz işlem yok.</td></tr></tbody></table></div></div>
     </div>
 
     <!-- X-RAY MODALI -->
@@ -270,7 +274,7 @@
                         <span class="stat-value" style="color: #a1a1aa;" id="modalStop">Trend Çıkışı</span>
                     </div>
                     <div class="stat-box">
-                        <span class="stat-label">2 Yıllık: Algoritma vs Al-Bekle</span>
+                        <span class="stat-label">2 Yıl Backtest: Algoritma vs Al-Bekle</span>
                         <span class="stat-value" id="modalAlpha">-</span>
                     </div>
                     <div class="stat-box mb-0" style="border-color: rgba(59, 130, 246, 0.4); background-color: rgba(59, 130, 246, 0.05);">
@@ -286,7 +290,15 @@
     <div id="backtest" class="section-panel">
         <div class="text-center mb-4">
             <h2 class="header-title">Performans Analizi</h2>
-            <p class="header-subtitle">BIST100 + Gram Altın evreninde ADX filtreli ve ATR iz süren stoplu motorun backtest sonuçları. Parametreler aynı 500 günlük veride optimize edildiği için bunlar geçmişe uyarlanmış (in-sample) sonuçlardır ve canlı performansın göstergesi değildir.</p>
+            <p class="header-subtitle">BIST100 + Gram Altın evreninde ADX filtreli ve ATR iz süren stoplu motorun backtest sonuçları. Parametreler aynı 500 günlük veride optimize edildiği için bunlar geçmişe uyarlanmış (in-sample) sonuçlardır ve canlı performansın göstergesi değildir. Evren bugünkü BIST100 listesidir (survivorship bias). Geçmişe uydurma etkisinden arındırılmış sonuç aşağıdaki out-of-sample bölümündedir.</p>
+        </div>
+
+        <div class="info-card mb-4" style="padding: 20px;">
+            <div class="d-flex justify-content-between align-items-center mb-2 px-3 flex-wrap gap-2"><h4 class="mb-0">Out-of-sample test (ileriye dönük)</h4><span class="badge" style="background-color: rgba(255,255,255,0.05); border: 1px solid var(--border);" id="oosBadge">-</span></div>
+            <p class="desc-text px-3 mb-3">Strateji her 63 işlem gününde yalnızca önceki 250 günle seçilir ve sonraki 63 günde, o günleri görmeden uygulanır. Geçmişe uydurma etkisini ölçmenin daha dürüst yoludur.</p>
+            <div class="px-3"><div class="stat-box"><span class="stat-label">Al-Bekle'yi yenen</span><span class="stat-value text-white" id="oosWin">-</span></div>
+            <div class="stat-box"><span class="stat-label">Al-Bekle vs Algoritma (medyan)</span><span class="stat-value" id="oosAvg">-</span></div></div>
+            <div id="oosChart" class="chart-container mt-3"></div>
         </div>
 
         <div class="info-card mb-5" style="padding: 20px;">
@@ -445,7 +457,7 @@
         const nb = document.getElementById('navbarNav');
         if (nb.classList.contains('show')) bootstrap.Collapse.getOrCreateInstance(nb).hide();
         if (tabId === 'backtest' && !isChartRendered) {
-            setTimeout(() => { renderMainApexChart(); isChartRendered = true; }, 250);
+            setTimeout(() => { renderMainApexChart(); renderOosChart(); isChartRendered = true; }, 250);
         }
     }
 
@@ -726,6 +738,27 @@
         }
     }
 
+    function renderOos(o) {
+        if (!o || !o.liste || !o.liste.length) { document.getElementById('oosBadge').innerText = 'veri yok'; return; }
+        const sg = v => (v >= 0 ? '+' : '') + '%' + v;
+        document.getElementById('oosBadge').innerText = 'Son ' + o.gun + ' işlem günü';
+        document.getElementById('oosWin').innerText = o.yenen_sayisi + ' / ' + o.liste.length + ' Varlık';
+        document.getElementById('oosAvg').innerHTML = `<span class="${o.bist_ort >= 0 ? 'text-white' : 'stat-loss'}">${sg(o.bist_ort)}</span> <span style="color: var(--text-muted); font-weight:400;">|</span> <span class="${o.algo_ort >= 0 ? 'stat-win' : 'stat-loss'}">${sg(o.algo_ort)}</span>`;
+    }
+    function renderOosChart() {
+        const g = globalPerformans && globalPerformans.oos && globalPerformans.oos.grafik, el = document.querySelector('#oosChart');
+        if (!g || !g.algo || !g.algo.length) { el.innerHTML = '<div class="text-center py-4" style="color: var(--text-muted);">Henüz veri yok.</div>'; return; }
+        new ApexCharts(el, { series: [{ name: 'Algoritma · out-of-sample', data: g.algo }, { name: 'Evren Al-Bekle', data: g.bist }],
+            chart: { type: 'area', height: 300, toolbar: { show: false }, fontFamily: 'Inter, sans-serif', background: 'transparent' }, colors: ['#10b981', '#52525b'],
+            fill: { type: ['gradient', 'solid'], gradient: { opacityFrom: 0.4, opacityTo: 0 } }, dataLabels: { enabled: false }, stroke: { curve: 'smooth', width: [3, 2] },
+            xaxis: { categories: g.tarihler, tickAmount: 6, labels: { style: { colors: '#a1a1aa' } } }, yaxis: { labels: { style: { colors: '#a1a1aa' }, formatter: v => v.toFixed(0) + ' ₺' } },
+            grid: { borderColor: '#27272a', strokeDashArray: 4 }, theme: { mode: 'dark' }, legend: { position: 'top', horizontalAlign: 'right', labels: { colors: '#f4f4f5' } } }).render();
+    }
+    function renderHistory(list) {
+        if (!list || !list.length) return;
+        document.getElementById('historyBody').innerHTML = list.map(o => `<tr><td>${esc(o.tarih)}</td><td style="font-weight: 600;">${esc(o.hisse)}</td><td>${esc(o.islem)}</td><td class="font-mono">${o.fiyat} ₺</td><td>${o.getiri == null ? '-' : (o.getiri >= 0 ? '+' : '') + '%' + o.getiri}</td></tr>`).join('');
+    }
+
     async function loadLiveSignals() {
         try {
             const response = await fetch('signals.json?t=' + Date.now());
@@ -743,8 +776,10 @@
             }
             if (data.performans) {
                 renderPerformanceSection(data.performans);
+                renderOos(data.performans.oos);
             }
             
+            renderHistory(data.islem_gecmisi);
             filterTable();
             startOnboardingTour(false);
         } catch (error) {
@@ -752,7 +787,7 @@
         }
     }
 
-    document.querySelectorAll('.custom-table thead th').forEach((th, i) => {
+    document.querySelectorAll('#radar .table-container .custom-table thead th').forEach((th, i) => {
         const k = ['hisse', 'sinyal', 'fiyat', 'strateji', 'stop', 'getiri'][i];
         th.dataset.k = k; th.title = 'Sırala';
         th.addEventListener('click', () => { sortDir = sortKey === k ? -sortDir : 1; sortKey = k; filterTable(); });
