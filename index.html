@@ -51,14 +51,21 @@
         .portfolio-card {
             background: linear-gradient(145deg, rgba(18, 18, 20, 1) 0%, rgba(9, 9, 11, 1) 100%);
             border: 1px solid var(--border); border-radius: 20px; padding: 35px 20px;
-            max-width: 550px; margin: 0 auto 40px auto; box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            max-width: 580px; margin: 0 auto 40px auto; box-shadow: 0 10px 30px rgba(0,0,0,0.4);
             position: relative; overflow: hidden;
         }
         .portfolio-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, var(--accent), var(--green)); }
         .balance-amount {
-            font-size: 3.5rem; font-weight: 700; font-family: 'Inter', sans-serif;
+            font-size: 3.2rem; font-weight: 700; font-family: 'Inter', sans-serif;
             background: -webkit-linear-gradient(#ffffff, #a1a1aa); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             margin: 5px 0; letter-spacing: -2px;
+        }
+        .portfolio-Allocation-badges {
+            display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 12px;
+        }
+        .alloc-badge {
+            background-color: rgba(255,255,255,0.04); border: 1px solid var(--border);
+            border-radius: 12px; padding: 4px 12px; font-size: 0.78rem; color: var(--text-muted);
         }
 
         /* Arama ve Filtreleme (Chips) */
@@ -138,7 +145,7 @@
         .social-btn:hover { background-color: var(--text-main); color: var(--bg-dark); }
 
         .chart-container { width: 100%; min-height: 380px; position: relative; margin-bottom: 20px; }
-        .modal-chart-container { width: 100%; min-height: 150px; margin-bottom: 15px; }
+        .modal-chart-container { width: 100%; min-height: 160px; margin-bottom: 15px; }
     </style>
 </head>
 <body>
@@ -172,39 +179,43 @@
     <!-- 1. BÖLÜM: CANLI RADAR -->
     <div id="radar" class="section-panel active">
         
-        <div class="portfolio-card text-center" data-title="Canlı Fon Büyüklüğü" data-intro="Burası portföyünüz. Başlangıç tarihinden itibaren algoritmamızın sağladığı net kârı saniye saniye canlı izleyebilirsiniz.">
-            <div style="color: var(--text-muted); font-size: 0.9rem; font-weight: 500; text-transform: uppercase; letter-spacing: 2px;">Canlı Fon Büyüklüğü</div>
-            <div class="balance-amount" id="portfolioBalance">100.000 ₺</div>
-            <div id="portfolioProfit" style="color: var(--green); font-weight: 600; font-size: 1.1rem; margin-bottom: 10px;">
-                <i class="bi bi-graph-up-arrow me-1"></i> +%0.0000 (Net Kâr)
+        <div class="portfolio-card text-center" data-title="Gerçek Fon Büyüklüğü" data-intro="Başlangıç tarihinden itibaren BIST100 + Gram Altın stratejilerinin ve PPF nakit yönetiminin gerçek kümülatif portföy değeridir.">
+            <div style="color: var(--text-muted); font-size: 0.9rem; font-weight: 500; text-transform: uppercase; letter-spacing: 2px;">Otonom Fon Büyüklüğü (BIST100)</div>
+            <div class="balance-amount" id="portfolioBalance">100.000,00 ₺</div>
+            <div id="portfolioProfit" style="color: var(--green); font-weight: 600; font-size: 1.05rem; margin-bottom: 8px;">
+                <i class="bi bi-graph-up-arrow me-1"></i> Hesaplanıyor...
             </div>
             <div style="font-size: 0.85rem; color: var(--text-muted);">
-                <i class="bi bi-rocket-takeoff me-1"></i> Başlangıç: 21 Ekim 2026 | Son Güncellenme: <span id="lastUpdate">Bekleniyor...</span>
+                <i class="bi bi-rocket-takeoff me-1"></i> Başlangıç: <span id="portfolioStartDate">21 Ekim 2026</span> (100.000 ₺) | Güncelleme: <span id="lastUpdate">Bekleniyor...</span>
+            </div>
+            <div class="portfolio-Allocation-badges">
+                <span class="alloc-badge" id="activePosBadge"><i class="bi bi-activity me-1 text-primary"></i> Aktif Trend: - Varlık</span>
+                <span class="alloc-badge" id="cashRatioBadge"><i class="bi bi-safe2 me-1 text-success"></i> PPF Nakit Oranı: %-</span>
             </div>
         </div>
 
         <!-- ARAMA VE FİLTRELEME (CHIPS) -->
-        <div class="filter-container" data-title="Akıllı Filtreleme" data-intro="Piyasayı saniyeler içinde tarayın. Arama kutusuna hisse adını yazabilir veya yandaki butonlarla sadece AL verenleri listeleyebilirsiniz.">
-            <input type="text" class="search-box" id="searchInput" placeholder="Hisse veya sembol ara..." onkeyup="filterTable()">
+        <div class="filter-container" data-title="Akıllı Filtreleme" data-intro="BIST100 hisselerini saniyeler içinde tarayın. Arama kutusuna hisse adını yazabilir veya butonlarla filtreleyebilirsiniz.">
+            <input type="text" class="search-box" id="searchInput" placeholder="BIST100 hissesi ara..." onkeyup="filterTable()">
             <div class="filter-chips">
                 <div class="chip active" id="chip-ALL" onclick="setFilter('ALL')">Tümü</div>
-                <div class="chip" id="chip-AL" onclick="setFilter('AL')">Sadece AL</div>
+                <div class="chip" id="chip-AL" onclick="setFilter('AL')">Yeni AL</div>
                 <div class="chip" id="chip-TUT" onclick="setFilter('TUT')">Trendde (TUT)</div>
-                <div class="chip" id="chip-SAT" onclick="setFilter('SAT')">Sadece SAT</div>
+                <div class="chip" id="chip-SAT" onclick="setFilter('SAT')">Yeni SAT</div>
             </div>
         </div>
 
-        <div class="table-container" data-title="Otonom Analiz Masası" data-intro="Makine öğrenmesi her hisse için en iyi indikatörü bulur. Herhangi bir satıra tıklayarak X-Ray analiz penceresine (Röntgen) ulaşabilirsiniz.">
+        <div class="table-container" data-title="Otonom Analiz Masası" data-intro="Herhangi bir satıra tıklayarak varlığın son 30 günlük gerçek fiyat grafiğine ve X-Ray analizine ulaşabilirsiniz.">
             <div class="table-responsive">
                 <table class="custom-table">
                     <thead>
                         <tr>
                             <th style="padding-left: 30px;">Varlık</th>
                             <th>Günlük Sinyal</th>
-                            <th>Anlık Fiyat</th>
+                            <th>Son Kapanış</th>
                             <th>Algoritma Zekası</th>
-                            <th>Çıkış Planı</th>
-                            <th class="text-end" style="padding-right: 30px;">Tarihsel Getiri</th>
+                            <th>Teknik Stop</th>
+                            <th class="text-end" style="padding-right: 30px;">2 Yıllık Getiri</th>
                         </tr>
                     </thead>
                     <tbody id="signalTableBody">
@@ -213,7 +224,7 @@
                 </table>
             </div>
             <div class="p-3 text-center" style="font-size: 0.8rem; color: var(--text-muted);">
-                <i class="bi bi-hand-index-thumb"></i> Algoritma detaylarını ve mini grafiği incelemek için tablodaki varlıkların üzerine tıklayın.
+                <i class="bi bi-hand-index-thumb"></i> Son 30 günlük gerçek fiyat grafiğini ve teknik seviyeleri incelemek için varlıkların üzerine tıklayın.
             </div>
         </div>
     </div>
@@ -223,12 +234,15 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content shadow-lg">
                 <div class="modal-header border-bottom-0 pb-0">
-                    <h5 class="modal-title" style="font-weight: 700; font-size: 1.5rem;">
-                        <i class="bi bi-cpu" style="color: var(--accent);"></i> <span id="modalHisse">ASTOR</span>
-                    </h5>
+                    <div>
+                        <h5 class="modal-title" style="font-weight: 700; font-size: 1.5rem;">
+                            <i class="bi bi-cpu" style="color: var(--accent);"></i> <span id="modalHisse">ASTOR</span>
+                        </h5>
+                        <small style="color: var(--text-muted); font-size: 0.78rem;">Son 30 İşlem Günü Gerçek Kapanış Grafiği</small>
+                    </div>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Kapat"></button>
                 </div>
-                <div class="modal-body" style="padding: 20px 25px;">
+                <div class="modal-body" style="padding: 15px 25px 25px 25px;">
                     <div id="modalChart" class="modal-chart-container"></div>
                     
                     <div class="stat-box">
@@ -236,18 +250,18 @@
                         <span class="stat-value text-white" id="modalFiyat">0.00 ₺</span>
                     </div>
                     <div class="stat-box">
-                        <span class="stat-label">EMA 200 Sınırı</span>
+                        <span class="stat-label">EMA 200 Sınırı (Ayı/Boğa Filtresi)</span>
                         <span class="stat-value" style="color: #a1a1aa;" id="modalEma">Hesaplanıyor...</span>
                     </div>
                     <div class="stat-box">
-                        <span class="stat-label">İndikatör</span>
+                        <span class="stat-label">Şampiyon İndikatör</span>
                         <span class="stat-value text-white" id="modalStrateji">MACD</span>
                     </div>
                     <div class="stat-box">
-                        <span class="stat-label">Teknik Stop / Çıkış</span>
+                        <span class="stat-label">Dinamik Stop Seviyesi</span>
                         <span class="stat-value" style="color: #a1a1aa;" id="modalStop">Trend Çıkışı</span>
                     </div>
-                    <div class="stat-box mb-3" style="border-color: rgba(59, 130, 246, 0.4); background-color: rgba(59, 130, 246, 0.05);">
+                    <div class="stat-box mb-0" style="border-color: rgba(59, 130, 246, 0.4); background-color: rgba(59, 130, 246, 0.05);">
                         <span class="stat-label" style="color: var(--accent);">Otonom Karar</span>
                         <span class="stat-value" id="modalSinyal">AL</span>
                     </div>
@@ -265,7 +279,7 @@
 
         <div class="info-card mb-5" style="padding: 20px;">
             <div class="d-flex justify-content-between align-items-center mb-3 px-3">
-                <h4 class="mb-0">Algoritma (Yeşil) vs BİST30 (Gri) Büyüme Eğrisi</h4>
+                <h4 class="mb-0">Algoritma (Yeşil) vs Endeks (Gri) Büyüme Eğrisi</h4>
                 <span class="badge" style="background-color: rgba(255,255,255,0.05); border: 1px solid var(--border);">Son 2 Yıl</span>
             </div>
             <div id="tvchart" class="chart-container"></div>
@@ -286,7 +300,7 @@
                         <span class="stat-value text-white">25 / 27 Varlık</span>
                     </div>
                     <div class="stat-box" style="margin-bottom: 5px;">
-                        <span class="stat-label">BİST30 Ortalama vs Algoritma</span>
+                        <span class="stat-label">Endeks Ortalama vs Algoritma</span>
                         <span class="stat-value"><span class="stat-loss">%-8.50</span> <span style="color: var(--text-muted); font-weight:400;">|</span> <span class="stat-win">+%18.20</span></span>
                     </div>
 
@@ -318,7 +332,7 @@
                         <span class="stat-value text-white">23 / 29 Varlık</span>
                     </div>
                     <div class="stat-box" style="margin-bottom: 5px;">
-                        <span class="stat-label">BİST30 Ortalama vs Algoritma</span>
+                        <span class="stat-label">Endeks Ortalama vs Algoritma</span>
                         <span class="stat-value"><span style="color: #f4f4f5;">+%42.44</span> <span style="color: var(--text-muted); font-weight:400;">|</span> <span class="stat-win">+%94.16</span></span>
                     </div>
 
@@ -374,7 +388,7 @@
                 <i class="bi bi-cpu info-icon mb-0 me-3"></i>
                 <h4 class="mb-0">Makine Öğrenmesi & Grid Search</h4>
             </div>
-            <p class="desc-text mb-0">Her varlığın farklı bir fiyatlama DNA'sı vardır. Otonom sistem, her akşam piyasa kapandıktan sonra varlıkları binlerce farklı indikatör kombinasyonuyla (Grid Search) geriye dönük test eder. Ekranda görülen veriler, o varlığın matematiksel olarak en kârlı olduğu "Şampiyon" stratejinin anlık sinyalidir.</p>
+            <p class="desc-text mb-0">Her varlığın farklı bir fiyatlama DNA'sı vardır. Otonom sistem, her akşam piyasa kapandıktan sonra BIST100 varlıklarını farklı indikatör kombinasyonuyla (Grid Search) geriye dönük test eder. Ekranda görülen veriler, o varlığın matematiksel olarak en kârlı olduğu "Şampiyon" stratejinin anlık sinyalidir.</p>
         </div>
     </div>
 
@@ -444,36 +458,31 @@
         };
         window.requestAnimationFrame(step);
     }
-    
-    function startLivePortfolioCounter() {
-        const startCapital = 100000; 
-        const startDate = new Date('2026-10-21T00:00:00'); 
-        const dailyGrowthRate = 0.0015; 
-        
-        function calculateCurrent() {
-            const now = new Date();
-            let diffTime = now - startDate;
-            if (diffTime < 0) diffTime = 0; 
-            const diffDays = diffTime / (1000 * 60 * 60 * 24);
-            return startCapital * Math.pow((1 + dailyGrowthRate), diffDays);
+
+    function renderRealPortfolioCard(portfoy) {
+        if (!portfoy) return;
+        const baslangic = portfoy.baslangic_sermaye || 100000;
+        const guncel = portfoy.guncel_bakiye || 100000;
+        const karTl = portfoy.net_kar_tl || 0;
+        const karYuzde = portfoy.net_kar_yuzde || 0;
+
+        animatePortfolioBalance(baslangic, guncel, 1800);
+
+        const profitEl = document.getElementById('portfolioProfit');
+        const isPositive = karYuzde >= 0;
+        const sign = isPositive ? '+' : '';
+        const icon = isPositive ? 'bi-graph-up-arrow' : 'bi-graph-down-arrow';
+        const formattedKarTl = karTl.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+        profitEl.style.color = isPositive ? 'var(--green)' : 'var(--red)';
+        profitEl.innerHTML = `<i class="bi ${icon} me-1"></i> ${sign}%${karYuzde.toFixed(2)} (${sign}${formattedKarTl} ₺ Net Kâr)`;
+
+        if (portfoy.baslangic_tarihi) {
+            document.getElementById('portfolioStartDate').innerText = portfoy.baslangic_tarihi;
         }
-
-        let initialBalance = calculateCurrent();
-        animatePortfolioBalance(startCapital, initialBalance, 2500);
-
-        setTimeout(() => {
-            setInterval(() => {
-                let liveBalance = calculateCurrent();
-                let liveProfitPct = ((liveBalance - startCapital) / startCapital) * 100;
-                document.getElementById('portfolioBalance').innerHTML = liveBalance.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " ₺";
-                let colorClass = liveProfitPct >= 0 ? 'var(--green)' : 'var(--red)';
-                let icon = liveProfitPct >= 0 ? 'bi-graph-up-arrow' : 'bi-graph-down-arrow';
-                document.getElementById('portfolioProfit').innerHTML = `<i class="bi ${icon} me-1"></i> +%${liveProfitPct.toFixed(4)} (Net Kâr)`;
-                document.getElementById('portfolioProfit').style.color = colorClass;
-            }, 1000); 
-        }, 2600);
+        document.getElementById('activePosBadge').innerHTML = `<i class="bi bi-activity me-1 text-primary"></i> Aktif Trend: <strong>${portfoy.aktif_pozisyon} / ${portfoy.toplam_varlik}</strong> Varlık`;
+        document.getElementById('cashRatioBadge').innerHTML = `<i class="bi bi-safe2 me-1 text-success"></i> PPF Nakit Kalkanı: <strong>%${portfoy.ppf_nakit_orani}</strong>`;
     }
-    startLivePortfolioCounter();
 
     function setFilter(type) {
         currentFilter = type;
@@ -533,21 +542,8 @@
 
     function renderXrayChart(item) {
         if (modalChartInstance) modalChartInstance.destroy();
-        let sparkData = [];
-        
-        // Eğer quantbot.py içinden gerçek son 20 gün verisi gelirse onu kullan, yoksa simüle et
-        if (Array.isArray(item.gecmis) && item.gecmis.length > 1) {
-            sparkData = item.gecmis;
-        } else {
-            let fiyat = item.fiyat;
-            let isBullish = (item.sinyal === 'AL' || item.sinyal === 'TUT');
-            let cur = fiyat * (isBullish ? 0.88 : 1.12);
-            for (let i = 0; i < 20; i++) {
-                cur += (Math.random() - (isBullish ? 0.42 : 0.58)) * (fiyat * 0.02);
-                sparkData.push(Number(cur.toFixed(2)));
-            }
-            sparkData[19] = fiyat;
-        }
+        const sparkData = Array.isArray(item.gecmis) && item.gecmis.length > 0 ? item.gecmis : [item.fiyat];
+        const categories = Array.isArray(item.tarihler) && item.tarihler.length === sparkData.length ? item.tarihler : sparkData.map((_, idx) => `Gün ${idx + 1}`);
 
         let chartColor = '#a1a1aa';
         if (item.sinyal === 'AL') chartColor = '#10b981';
@@ -555,12 +551,19 @@
         else if (item.sinyal === 'SAT') chartColor = '#ef4444';
 
         var options = {
-            series: [{ name: 'Fiyat', data: sparkData }],
-            chart: { type: 'area', height: 150, sparkline: { enabled: true }, animations: { enabled: true } },
-            stroke: { curve: 'smooth', width: 2 },
-            fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.3, opacityTo: 0.0, stops: [0, 100] } },
+            series: [{ name: 'Kapanış', data: sparkData }],
+            chart: { type: 'area', height: 160, sparkline: { enabled: true }, animations: { enabled: true } },
+            stroke: { curve: 'smooth', width: 2.5 },
+            fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.35, opacityTo: 0.0, stops: [0, 100] } },
             colors: [chartColor],
-            tooltip: { fixed: { enabled: false }, x: { show: false }, y: { title: { formatter: () => '' } }, marker: { show: false } }
+            xaxis: { categories: categories },
+            tooltip: {
+                theme: 'dark',
+                fixed: { enabled: false },
+                x: { show: true, formatter: (val, opts) => categories[opts.dataPointIndex] || '' },
+                y: { formatter: (val) => val.toFixed(2) + ' ₺' },
+                marker: { show: true }
+            }
         };
         modalChartInstance = new ApexCharts(document.querySelector("#modalChart"), options);
         modalChartInstance.render();
@@ -571,7 +574,15 @@
         document.getElementById('modalHisse').innerText = item.hisse;
         document.getElementById('modalFiyat').innerText = item.fiyat + " ₺";
         document.getElementById('modalStrateji').innerText = item.strateji;
-        document.getElementById('modalEma').innerText = item.ema200 ? item.ema200 + " ₺" : "Veri Bekleniyor...";
+        
+        if (item.ema200) {
+            const farkYuzde = (((item.fiyat - item.ema200) / item.ema200) * 100).toFixed(1);
+            const farkIsaret = farkYuzde >= 0 ? `+${farkYuzde}%` : `${farkYuzde}%`;
+            document.getElementById('modalEma').innerText = `${item.ema200} ₺ (${farkIsaret})`;
+        } else {
+            document.getElementById('modalEma').innerText = "Veri Bekleniyor...";
+        }
+        
         document.getElementById('modalStop').innerText = item.stop || "Trend Çıkışı";
         
         let sinyalSpan = document.getElementById('modalSinyal');
@@ -619,7 +630,7 @@
         algoData[algoData.length - 1] = 194.16; bistData[bistData.length - 1] = 142.44;
 
         var options = {
-            series: [{ name: 'Algoritma', data: algoData }, { name: 'BİST30', data: bistData }],
+            series: [{ name: 'Algoritma', data: algoData }, { name: 'Endeks', data: bistData }],
             chart: { type: 'area', height: 380, toolbar: { show: false }, fontFamily: 'Inter, sans-serif', background: 'transparent' },
             colors: ['#10b981', '#52525b'],
             fill: { type: ['gradient', 'solid'], gradient: { shadeIntensity: 1, opacityFrom: 0.4, opacityTo: 0.0, stops: [0, 100] } },
@@ -659,6 +670,11 @@
             
             globalSignals = data.sinyaller; 
             document.getElementById('lastUpdate').innerText = data.guncellenme_tarihi;
+            
+            if (data.portfoy) {
+                renderRealPortfolioCard(data.portfoy);
+            }
+            
             filterTable();
             startOnboardingTour(false);
         } catch (error) {
