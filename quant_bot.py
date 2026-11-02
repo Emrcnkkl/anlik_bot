@@ -14,6 +14,7 @@ KOMISYON = 0.002
 WF_EGITIM = 250   # walk-forward: strateji seçimi için geriye bakış (işlem günü)
 WF_TEST = 63      # walk-forward: seçilen stratejinin görmeden uygulandığı dönem
 HISTORY_DOSYASI = "history.json"
+SLIPAJ = 0.001    # her işlemde yön başına kayma varsayımı (binde 1)
 
 # Gram Altın + BIST100 Hisseleri
 bist100 = [
@@ -160,9 +161,9 @@ def backtest_gelismis_motor(fiyatlar, acilislar, durumlar, kalkanlar, atrler, ad
     for i in range(n):
         ac = acilislar[i]
         if emir == 1 and adet == 0.0:
-            giris_bakiye, adet, nakit, zirve = nakit, nakit * (1.0 - KOMISYON) / ac, 0.0, ac
+            giris_bakiye, adet, nakit, zirve = nakit, nakit * (1.0 - KOMISYON) / (ac * (1.0 + SLIPAJ)), 0.0, ac
         elif emir == -1 and adet > 0.0:
-            nakit, adet = adet * ac * (1.0 - KOMISYON), 0.0
+            nakit, adet = adet * ac * (1.0 - SLIPAJ) * (1.0 - KOMISYON), 0.0
             toplam += 1; kazanan += int(nakit > giris_bakiye)
         emir = 0
         fiyat, kalkan, atr = fiyatlar[i], kalkanlar[i], atrler[i]
@@ -248,11 +249,11 @@ def canli_kitabi_guncelle(gecmis, hedefler, veriler):
             k["son_tarih"] = v["tarih"]
         elif v["tarih"] > k["son_tarih"]:
             if bekleyen.get(h, 0) == 1 and k["adet"] == 0.0:
-                k["adet"] = k["nakit"] * (1.0 - KOMISYON) / v["acilis"]; k["nakit"] = 0.0; k["giris_fiyat"] = v["acilis"]
+                k["giris_fiyat"] = v["acilis"] * (1.0 + SLIPAJ); k["adet"] = k["nakit"] * (1.0 - KOMISYON) / k["giris_fiyat"]; k["nakit"] = 0.0
                 olaylar.append({"tarih": v["tarih"], "hisse": h, "islem": "Trend Girişi", "fiyat": round(v["acilis"], 2), "getiri": None, "strateji": v["strateji"]})
             elif bekleyen.get(h, 0) == 0 and k["adet"] > 0.0:
-                k["nakit"] = k["adet"] * v["acilis"] * (1.0 - KOMISYON)
-                g = round((v["acilis"] / k["giris_fiyat"] - 1.0) * 100.0, 1) if k["giris_fiyat"] else None
+                k["nakit"] = k["adet"] * v["acilis"] * (1.0 - SLIPAJ) * (1.0 - KOMISYON)
+                g = round((v["acilis"] * (1.0 - SLIPAJ) / k["giris_fiyat"] - 1.0) * 100.0, 1) if k["giris_fiyat"] else None
                 k["adet"] = 0.0
                 olaylar.append({"tarih": v["tarih"], "hisse": h, "islem": "Trend Çıkışı", "fiyat": round(v["acilis"], 2), "getiri": g, "strateji": v["strateji"]})
             if k["adet"] == 0.0:
@@ -275,9 +276,10 @@ kitap_son = {h: k.get("son_tarih") for h, k in gecmis.get("kitap", {}).get("kasa
 
 print("⏳ BIST100 ve Gram Altın Verileri İndiriliyor...")
 normal_hisseler = [h for h in bist100 if h != "GRAM_ALTIN"]
-toplu_veri = yf.download(normal_hisseler + ["GC=F", "TRY=X"], period="3y", interval="1d", group_by='ticker', progress=False, threads=True)
+toplu_veri = yf.download(normal_hisseler + ["GC=F", "TRY=X", "XU100.IS"], period="3y", interval="1d", group_by='ticker', progress=False, threads=True)
 
 site_verileri, canli_veriler, hedefler = [], {}, {}
+stop_map, gram_close = {}, None
 is_egrileri, bh_egrileri, oos_algo_egrileri, oos_bh_egrileri = [], [], [], []
 perf2, perf6, perf_oos = [], [], []
 
@@ -303,6 +305,7 @@ for hisse in bist100:
             continue
 
         df = hesapla_temel_metrikler(df)
+        if hisse == "GRAM_ALTIN": gram_close = df['Close'].copy()
         test = df.tail(500).copy(); n = len(test)
         fiy, acl, atr, adx = test['Close'].values, test['Open'].values, test['ATR'].values, test['ADX'].values
         k = {"EMA200": test['EMA200'].values, "EMA100": test['EMA100'].values}
@@ -327,7 +330,7 @@ for hisse in bist100:
         g6 = min(126, n - 1)
         bh_6 = round((fiy[-1] - fiy[-g6]) / max(1e-8, fiy[-g6]) * 100.0, 1)
         algo_6 = round((bakiye[-1] - bakiye[-g6]) / max(1e-8, bakiye[-g6]) * 100.0, 1)
-        st = float(sonuc["stop_serisi"][-1])
+        st = float(sonuc["stop_serisi"][-1]); stop_map[temiz] = st
 
         tarih_iso = test.index.strftime("%Y-%m-%d")
         canli_veriler[temiz] = {"acilis": float(acl[-1]), "kapanis": float(fiy[-1]), "tarih": tarih_iso[-1], "strateji": strateji,
@@ -346,6 +349,7 @@ for hisse in bist100:
             idx = test.index[WF_EGITIM:]; bh_c = fiy[WF_EGITIM:] / fiy[WF_EGITIM - 1]
             oa, ob = round((egri[-1] - 1.0) * 100.0, 1), round((bh_c[-1] - 1.0) * 100.0, 1)
             perf_oos.append({"hisse": temiz, "bh": ob, "algo": oa, "yendi": bool(oa > ob)})
+            site_verileri[-1]["oos_getiri"], site_verileri[-1]["oos_bh"] = oa, ob
             oos_algo_egrileri.append(pd.Series(egri * 100.0, index=idx)); oos_bh_egrileri.append(pd.Series(bh_c * 100.0, index=idx))
     except Exception as e:
         print(f"⚠️ {hisse} hesaplanırken hata: {e}")
@@ -357,6 +361,23 @@ for d in site_verileri:
     d["sinyal"] = "TUT" if poz and hdf else "SAT" if poz else "AL" if hdf else "İZLE"
 with open(HISTORY_DOSYASI, "w", encoding="utf-8") as f:
     json.dump(gecmis, f, ensure_ascii=False, indent=1)
+
+def risk(v):
+    v = np.array(v, dtype=float)
+    if len(v) < 30: return None
+    r = np.diff(v) / v[:-1]; sd = r.std(ddof=1); dsd = np.sqrt(np.mean(np.minimum(r, 0.0) ** 2)); pk = np.maximum.accumulate(v)
+    return {"sharpe": round(float(r.mean() / sd * np.sqrt(252)), 2) if sd > 0 else None, "sortino": round(float(r.mean() / dsd * np.sqrt(252)), 2) if dsd > 0 else None,
+            "max_dd": round(float(np.max((pk - v) / pk) * 100.0), 1), "getiri": round(float((v[-1] / v[0] - 1.0) * 100.0), 1)}
+
+def hizala(close, tarihler, baslangic):
+    if close is None or not tarihler: return []
+    c = close.dropna().copy(); c.index = c.index.strftime("%Y-%m-%d"); c = c[~c.index.duplicated()]
+    ilk = c[c.index <= baslangic]
+    if ilk.empty: return []
+    b0 = float(ilk.iloc[-1]); cikti = []
+    for t in tarihler:
+        u = c[c.index <= t]; cikti.append(round(BASLANGIC_SERMAYE * float(u.iloc[-1]) / b0, 2) if len(u) else None)
+    return cikti
 
 def egri_paketi(a, b):
     if not a: return {"tarihler": [], "algo": [], "bist": []}
@@ -374,6 +395,21 @@ aktif = sum(1 for kz in kasalar.values() if kz["adet"] > 0)
 nakit_deger = sum(kz["nakit"] for kz in kasalar.values())
 seri = gecmis["deger_serisi"]
 oos = ozet(perf_oos); oos["gun"] = max(0, 500 - WF_EGITIM); oos["grafik"] = egri_paketi(oos_algo_egrileri, oos_bh_egrileri)
+oos["risk"] = {"algo": risk(oos["grafik"]["algo"]), "bist": risk(oos["grafik"]["bist"])}
+
+tarihler_c = [x["tarih"] for x in seri]; bas = gecmis["kitap"]["baslangic"]
+try: xu = sayi(toplu_veri["XU100.IS"]['Close'])
+except Exception: xu = None
+canli_paket = {"tarihler": tarihler_c, "deger": [x["deger"] for x in seri], "bist100": hizala(xu, tarihler_c, bas), "gram_altin": hizala(gram_close, tarihler_c, bas),
+               "ppf": [round(BASLANGIC_SERMAYE * (1.0 + PPF_GUNLUK_GETIRI) ** i, 2) for i in range(len(seri))]}
+son_giris = {o["hisse"]: o["tarih"] for o in gecmis["olaylar"] if o["islem"] == "Trend Girişi"}
+pozisyonlar = sorted([{"hisse": h, "giris_tarih": son_giris.get(h, "-"), "giris_fiyat": round(kz["giris_fiyat"], 2), "fiyat": round(kz["son_fiyat"], 2),
+                       "kz": round((kz["son_fiyat"] / kz["giris_fiyat"] - 1.0) * 100.0, 1), "stop": round(stop_map.get(h, 0.0), 2),
+                       "stop_mesafe": round((kz["son_fiyat"] - stop_map[h]) / kz["son_fiyat"] * 100.0, 1) if stop_map.get(h, 0) > 0 else None}
+                      for h, kz in kasalar.items() if kz["adet"] > 0 and kz["giris_fiyat"]], key=lambda x: -x["kz"])
+kapanan = [o["getiri"] for o in gecmis["olaylar"] if o["islem"] == "Trend Çıkışı" and o.get("getiri") is not None]
+islem_ozeti = {"kapanan": len(kapanan), "kazanma_orani": round(100.0 * sum(1 for g in kapanan if g > 0) / len(kapanan), 1) if kapanan else None,
+               "ort_getiri": round(float(np.mean(kapanan)), 1) if kapanan else None}
 
 veri_paketi = {
     "guncellenme_tarihi": (datetime.utcnow() + timedelta(hours=3)).strftime("%d.%m.%Y %H:%M"),
@@ -381,7 +417,7 @@ veri_paketi = {
                 "guncel_bakiye": round(guncel, 2), "net_kar_tl": round(guncel - BASLANGIC_SERMAYE, 2),
                 "net_kar_yuzde": round((guncel / BASLANGIC_SERMAYE - 1.0) * 100.0, 2), "aktif_pozisyon": aktif,
                 "toplam_varlik": toplam, "ppf_nakit_orani": round(nakit_deger / max(1e-8, guncel) * 100.0, 1)},
-    "canli": {"tarihler": [x["tarih"] for x in seri], "deger": [x["deger"] for x in seri]},
+    "canli": canli_paket, "pozisyonlar": pozisyonlar, "islem_ozeti": islem_ozeti,
     "islem_gecmisi": gecmis["olaylar"][-60:][::-1],
     "performans": {"toplam_varlik": toplam, "alti_ay": ozet(perf6), "iki_yil": ozet(perf2), "oos": oos,
                    "grafik": egri_paketi(is_egrileri, bh_egrileri)},
