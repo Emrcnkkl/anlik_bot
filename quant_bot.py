@@ -260,7 +260,7 @@ def canli_kitabi_guncelle(gecmis, hedefler, veriler):
                 k["nakit"] *= (1.0 + PPF_GUNLUK_GETIRI) ** max(1, v["yeni_bar"])
             k["son_tarih"] = v["tarih"]
         k["son_fiyat"] = v["kapanis"]
-    kitap["bekleyen"] = {h: int(x) for h, x in hedefler.items()}
+    kitap["bekleyen"] = {**bekleyen, **{h: int(x) for h, x in hedefler.items()}}
     deger = sum(k["nakit"] + k["adet"] * k["son_fiyat"] for k in kasalar.values())
     bugun = max(k["son_tarih"] for k in kasalar.values())
     kitap.setdefault("baslangic", bugun)
@@ -355,6 +355,9 @@ for hisse in bist100:
         print(f"⚠️ {hisse} hesaplanırken hata: {e}")
 
 # İLERİYE DÖNÜK (dondurulmuş) model portföy
+beklenen = len(gecmis.get("kitap", {}).get("kasalar", {})) or len(bist100)
+if len(canli_veriler) < 0.7 * beklenen:
+    raise SystemExit(f"❌ Veri eksik ({len(canli_veriler)}/{beklenen} varlık). Dosyalar güncellenmedi.")
 kasalar, guncel = canli_kitabi_guncelle(gecmis, hedefler, canli_veriler)
 for d in site_verileri:
     kz = kasalar.get(d["hisse"]); poz = bool(kz and kz["adet"] > 0); hdf = hedefler.get(d["hisse"], 0)
