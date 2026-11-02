@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QuantBIST | Otonom Yatırım Terminali</title>
+    <title>QuantBIST | Algoritmik Model Paneli</title>
     
     <!-- PWA MANIFEST -->
-    <link id="manifest-link" rel="manifest" href="">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <meta name="description" content="QuantBIST: kural tabanlı algoritmik modelin BIST100 ve gram altın için günlük çıktıları. Yatırım tavsiyesi değildir.">
     <meta name="theme-color" content="#09090b">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -16,7 +18,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- APEXCHARTS -->
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.54.1/dist/apexcharts.min.js"></script>
 
     <!-- INTRO.JS (Uygulama Turu) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intro.js/7.2.0/introjs.min.css">
@@ -146,11 +148,14 @@
 
         .chart-container { width: 100%; min-height: 380px; position: relative; margin-bottom: 20px; }
         .modal-chart-container { width: 100%; min-height: 160px; margin-bottom: 15px; }
+    .notice { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.35); color: #fcd34d; border-radius: 12px; padding: 10px 16px; font-size: 0.82rem; line-height: 1.5; margin-bottom: 20px; }
+        .site-footer { border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.75rem; line-height: 1.6; padding: 24px 0 40px; }
+        .custom-table th[data-k] { cursor: pointer; user-select: none; }
     </style>
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg fixed-top" data-title="QuantBIST'e Hoş Geldiniz" data-intro="Bu hızlı tur ile yatırım kararlarınızı nasıl optimize edeceğinizi öğreneceksiniz.">
+<nav class="navbar navbar-expand-lg fixed-top" data-title="QuantBIST'e Hoş Geldiniz" data-intro="Bu hızlı tur ile modelin çıktılarını nasıl okuyacağınızı öğreneceksiniz. İçerik yatırım tavsiyesi değildir.">
     <div class="container">
         <a class="navbar-brand" onclick="switchTab('radar')" style="cursor: pointer;">
             <i class="bi bi-layers-half me-2" style="color: var(--accent);"></i>Quant<span>BIST</span>
@@ -176,22 +181,24 @@
 
 <div class="container mt-4 mb-5">
 
+    <div class="notice" role="note"><i class="bi bi-info-circle me-2"></i><strong>Yatırım tavsiyesi değildir.</strong> Burada gösterilenler, kişisel mali durum ve risk tercihleri dikkate alınmadan çalışan otomatik bir modelin geçmiş veriye dayalı çıktılarıdır; alım-satım önerisi içermez. Geçmiş performans gelecek sonuçların garantisi değildir.</div>
+
     <!-- 1. BÖLÜM: CANLI RADAR -->
     <div id="radar" class="section-panel active">
         
-        <div class="portfolio-card text-center" data-title="Gerçek Fon Büyüklüğü" data-intro="Başlangıç tarihinden itibaren BIST100 + Gram Altın stratejilerinin ve PPF nakit yönetiminin gerçek kümülatif portföy değeridir.">
-            <div style="color: var(--text-muted); font-size: 0.9rem; font-weight: 500; text-transform: uppercase; letter-spacing: 2px;">Otonom Fon Büyüklüğü (BIST100)</div>
+        <div class="portfolio-card text-center" data-title="Model Portföy (Simülasyon)" data-intro="Başlangıç tarihinden itibaren modelin eşit ağırlıklı simülasyon portföyünün değeri. Gerçek para değildir.">
+            <div style="color: var(--text-muted); font-size: 0.9rem; font-weight: 500; text-transform: uppercase; letter-spacing: 2px;">Model Portföy Değeri (Simülasyon)</div>
             <div class="balance-amount" id="portfolioBalance">100.000,00 ₺</div>
             <div id="portfolioProfit" style="color: var(--green); font-weight: 600; font-size: 1.05rem; margin-bottom: 8px;">
                 <i class="bi bi-graph-up-arrow me-1"></i> Hesaplanıyor...
             </div>
             <div style="font-size: 0.85rem; color: var(--text-muted);">
-                <i class="bi bi-rocket-takeoff me-1"></i> Başlangıç: <span id="portfolioStartDate">21 Ekim 2026</span> (100.000 ₺) | Güncelleme: <span id="lastUpdate">Bekleniyor...</span>
+                <i class="bi bi-rocket-takeoff me-1"></i> Başlangıç: <span id="portfolioStartDate">21 Ekim 2026</span> (100.000 ₺) | Güncelleme: <span id="lastUpdate">Bekleniyor...</span><br><span style="font-size:0.75rem;">Eşit ağırlıklı simülasyon. Strateji her gece yeniden seçildiği için geçmiş günler de yeniden hesaplanır.</span>
             </div>
             <div class="portfolio-Allocation-badges">
                 <span class="alloc-badge" id="activePosBadge"><i class="bi bi-activity me-1 text-primary"></i> Aktif Trend: - Varlık</span>
                 <span class="alloc-badge" id="cashRatioBadge"><i class="bi bi-safe2 me-1 text-success"></i> PPF Nakit Kalkanı: %-</span>
-                <span class="alloc-badge" id="alphaWinBadge"><i class="bi bi-trophy me-1 text-warning"></i> Al-Bekle'yi Yenen: -</span>
+                <span class="alloc-badge" id="alphaWinBadge"><i class="bi bi-trophy me-1 text-warning"></i> Backtestte Al-Bekle'yi Yenen: -</span>
             </div>
         </div>
 
@@ -200,9 +207,9 @@
             <input type="text" class="search-box" id="searchInput" placeholder="BIST100 hissesi ara..." onkeyup="filterTable()">
             <div class="filter-chips">
                 <div class="chip active" id="chip-ALL" onclick="setFilter('ALL')">Tümü</div>
-                <div class="chip" id="chip-AL" onclick="setFilter('AL')">Yeni AL</div>
-                <div class="chip" id="chip-TUT" onclick="setFilter('TUT')">Trendde (TUT)</div>
-                <div class="chip" id="chip-SAT" onclick="setFilter('SAT')">Yeni SAT</div>
+                <div class="chip" id="chip-AL" onclick="setFilter('AL')">Yeni Giriş</div>
+                <div class="chip" id="chip-TUT" onclick="setFilter('TUT')">Trendde</div>
+                <div class="chip" id="chip-SAT" onclick="setFilter('SAT')">Yeni Çıkış</div>
             </div>
         </div>
 
@@ -212,7 +219,7 @@
                     <thead>
                         <tr>
                             <th style="padding-left: 30px;">Varlık</th>
-                            <th>Günlük Sinyal</th>
+                            <th>Model Durumu</th>
                             <th>Son Kapanış</th>
                             <th>Şampiyon Strateji</th>
                             <th>ATR İz Süren Stop</th>
@@ -267,7 +274,7 @@
                         <span class="stat-value" id="modalAlpha">-</span>
                     </div>
                     <div class="stat-box mb-0" style="border-color: rgba(59, 130, 246, 0.4); background-color: rgba(59, 130, 246, 0.05);">
-                        <span class="stat-label" style="color: var(--accent);">Otonom Karar</span>
+                        <span class="stat-label" style="color: var(--accent);">Model Durumu</span>
                         <span class="stat-value" id="modalSinyal">AL</span>
                     </div>
                 </div>
@@ -279,12 +286,12 @@
     <div id="backtest" class="section-panel">
         <div class="text-center mb-4">
             <h2 class="header-title">Performans Analizi</h2>
-            <p class="header-subtitle">BIST100 + Gram Altın evreninde ADX filtreli ve ATR iz süren stoplu motorun gerçek backtest sonuçları.</p>
+            <p class="header-subtitle">BIST100 + Gram Altın evreninde ADX filtreli ve ATR iz süren stoplu motorun backtest sonuçları. Parametreler aynı 500 günlük veride optimize edildiği için bunlar geçmişe uyarlanmış (in-sample) sonuçlardır ve canlı performansın göstergesi değildir.</p>
         </div>
 
         <div class="info-card mb-5" style="padding: 20px;">
             <div class="d-flex justify-content-between align-items-center mb-3 px-3">
-                <h4 class="mb-0">Algoritma (Yeşil) vs BIST100 Al-Bekle (Gri) Büyüme Eğrisi</h4>
+                <h4 class="mb-0">Algoritma (Yeşil) vs Evren Al-Bekle (Gri) · Backtest</h4>
                 <span class="badge" style="background-color: rgba(255,255,255,0.05); border: 1px solid var(--border);">Son 500 İşlem Günü</span>
             </div>
             <div id="tvchart" class="chart-container"></div>
@@ -305,7 +312,7 @@
                         <span class="stat-value text-white" id="perf6mWinCount">- / - Varlık</span>
                     </div>
                     <div class="stat-box" style="margin-bottom: 5px;">
-                        <span class="stat-label">Al-Bekle Ort. vs Algoritma</span>
+                        <span class="stat-label">Al-Bekle vs Algoritma (medyan)</span>
                         <span class="stat-value" id="perf6mAvg">-</span>
                     </div>
 
@@ -330,7 +337,7 @@
                         <span class="stat-value text-white" id="perf2yWinCount">- / - Varlık</span>
                     </div>
                     <div class="stat-box" style="margin-bottom: 5px;">
-                        <span class="stat-label">Al-Bekle Ort. vs Algoritma</span>
+                        <span class="stat-label">Al-Bekle vs Algoritma (medyan)</span>
                         <span class="stat-value" id="perf2yAvg">-</span>
                     </div>
 
@@ -392,7 +399,7 @@
             </p>
             
             <p class="desc-text" style="text-align: left; margin-bottom: 40px;">
-                Bu altyapı, geleneksel hisse senedi yatırımlarını veri bilimi ve CI/CD otomasyonu (GitHub Actions) ile birleştirerek, insan psikolojisinden bağımsız, istikrarlı bir getiri modeli oluşturmak amacıyla geliştirilmiştir.
+                Bu altyapı, geleneksel hisse senedi yatırımlarını veri bilimi ve CI/CD otomasyonu (GitHub Actions) ile birleştirerek, insan psikolojisinden bağımsız, kural tabanlı bir model araştırması olarak geliştirilmiştir. Yatırım tavsiyesi değildir.
             </p>
             
             <div class="d-flex justify-content-center flex-wrap gap-2">
@@ -411,21 +418,21 @@
 
 </div>
 
+<footer class="site-footer"><div class="container">
+    <strong>Yasal uyarı.</strong> Bu sitedeki içerik yatırım danışmanlığı veya portföy yöneticiliği hizmeti değildir, kişiye özel değildir ve hiçbir sermaye piyasası aracı için alım, satım ya da tutma tavsiyesi içermez. Gösterilen sinyaller, getiriler ve portföy değeri bir modelin simülasyon/backtest çıktısıdır; komisyon (%0,2) ve PPF getirisi varsayımları içerir, gerçek işlem sonuçlarını yansıtmaz. Parametreler geçmiş veride optimize edilmiştir, bu nedenle sonuçlar geleceği öngörmez. Site sahibi SPK'dan yetkili bir yatırım kuruluşu değildir. Veriler Yahoo Finance kaynaklıdır; gecikmeli veya hatalı olabilir. Yatırım kararları ve doğuracağı sonuçlar tamamen okuyucuya aittir; karar vermeden önce yetkili bir kuruluştan danışmanlık almanız önerilir.
+</div></footer>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-    // PWA Motoru
-    const manifestData = {
-        "name": "QuantBIST Otonom Fon", "short_name": "QuantBIST", "start_url": ".", "display": "standalone",
-        "background_color": "#09090b", "theme_color": "#09090b",
-        "icons": [{ "src": "https://cdn-icons-png.flaticon.com/512/2933/2933116.png", "sizes": "512x512", "type": "image/png" }]
-    };
-    document.getElementById('manifest-link').href = URL.createObjectURL(new Blob([JSON.stringify(manifestData)], {type: 'application/json'}));
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 
     let isChartRendered = false;
     let globalSignals = [];
     let globalPerformans = null;
     let currentFilter = 'ALL';
+    let sortKey = null, sortDir = 1;
+    const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     let modalChartInstance = null;
 
     function switchTab(tabId) {
@@ -434,6 +441,9 @@
         document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
         const activeNav = document.getElementById('nav-' + tabId);
         if (activeNav) activeNav.classList.add('active');
+        history.replaceState(null, '', '#' + tabId);
+        const nb = document.getElementById('navbarNav');
+        if (nb.classList.contains('show')) bootstrap.Collapse.getOrCreateInstance(nb).hide();
         if (tabId === 'backtest' && !isChartRendered) {
             setTimeout(() => { renderMainApexChart(); isChartRendered = true; }, 250);
         }
@@ -478,12 +488,14 @@
         document.getElementById('cashRatioBadge').innerHTML = `<i class="bi bi-safe2 me-1 text-success"></i> PPF Nakit: <strong>%${portfoy.ppf_nakit_orani}</strong>`;
 
         if (performans && performans.iki_yil) {
-            document.getElementById('alphaWinBadge').innerHTML = `<i class="bi bi-trophy me-1 text-warning"></i> Al-Bekle'yi Yenen: <strong>${performans.iki_yil.yenen_sayisi} / ${performans.toplam_varlik}</strong>`;
+            document.getElementById('alphaWinBadge').innerHTML = `<i class="bi bi-trophy me-1 text-warning"></i> Backtestte Al-Bekle'yi Yenen: <strong>${performans.iki_yil.yenen_sayisi} / ${performans.toplam_varlik}</strong>`;
         }
     }
 
     function renderPerformanceSection(performans) {
         if (!performans) return;
+        const med = a => { const t = [...a].sort((x, y) => x - y), m = t.length >> 1; return t.length % 2 ? t[m] : (t[m - 1] + t[m]) / 2; };
+        ['alti_ay', 'iki_yil'].forEach(k => { const p = performans[k]; if (p && p.liste && p.liste.length) { p.bist_ort = +med(p.liste.map(x => x.bh)).toFixed(1); p.algo_ort = +med(p.liste.map(x => x.algo)).toFixed(1); } });
         const toplam = performans.toplam_varlik || globalSignals.length;
 
         if (performans.alti_ay) {
@@ -539,24 +551,25 @@
             const matchesFilter = currentFilter === 'ALL' || item.sinyal === currentFilter;
             return matchesSearch && matchesFilter;
         });
+        if (sortKey) filtered.sort((a, b) => { const x = a[sortKey], y = b[sortKey]; return (typeof x === 'number' && typeof y === 'number' ? x - y : String(x).localeCompare(String(y), 'tr', {numeric: true})) * sortDir; });
         renderTableRows(filtered);
     }
 
     function getSignalBadgeHtml(sinyal) {
         if (sinyal === "AL") {
-            return `<span style="color: var(--green); font-weight: 600;"><i class="bi bi-arrow-up-right-circle-fill me-1"></i> AL</span>`;
+            return `<span style="color: var(--green); font-weight: 600;"><i class="bi bi-arrow-up-right-circle-fill me-1"></i> Trend Girişi</span>`;
         } else if (sinyal === "SAT") {
-            return `<span style="color: var(--red); font-weight: 600;"><i class="bi bi-arrow-down-right-circle-fill me-1"></i> SAT</span>`;
+            return `<span style="color: var(--red); font-weight: 600;"><i class="bi bi-arrow-down-right-circle-fill me-1"></i> Trend Çıkışı</span>`;
         } else if (sinyal === "TUT") {
-            return `<span style="color: var(--accent); font-weight: 600;"><i class="bi bi-shield-check me-1"></i> TUT</span>`;
+            return `<span style="color: var(--accent); font-weight: 600;"><i class="bi bi-shield-check me-1"></i> Trendde</span>`;
         } else {
-            return `<span style="color: var(--text-muted); font-weight: 500;"><i class="bi bi-dash-circle me-1"></i> İZLE</span>`;
+            return `<span style="color: var(--text-muted); font-weight: 500;"><i class="bi bi-dash-circle me-1"></i> Nötr</span>`;
         }
     }
 
     function renderTableRows(dataArray) {
         const tbody = document.getElementById('signalTableBody');
-        tbody.innerHTML = ""; 
+        let rowsHtml = "";
         if (dataArray.length === 0) {
             tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">Kriterlere uygun hisse bulunamadı.</td></tr>`;
             return;
@@ -572,15 +585,16 @@
                 bhText = ` <small style="color: var(--text-muted); font-size: 0.78rem;">(${bhSign}%${item.bh_getiri})</small>`;
             }
 
-            tbody.innerHTML += `<tr onclick="openXrayModal(${originalIndex})">
-                <td style="padding-left: 30px; font-weight: 600;">${item.hisse}</td>
+            rowsHtml += `<tr onclick="openXrayModal(${originalIndex})">
+                <td style="padding-left: 30px; font-weight: 600;">${esc(item.hisse)}</td>
                 <td>${signalHtml}</td>
                 <td class="font-mono">${item.fiyat} ₺</td>
-                <td><span class="strategy-badge">${item.strateji}</span></td>
-                <td style="color: var(--text-muted); font-size: 0.85rem;">${item.stop}</td>
+                <td><span class="strategy-badge">${esc(item.strateji)}</span></td>
+                <td style="color: var(--text-muted); font-size: 0.85rem;">${esc(item.stop)}</td>
                 <td class="text-end" style="padding-right: 30px;">${getiriHtml}${bhText}</td>
             </tr>`;
         });
+        tbody.innerHTML = rowsHtml;
     }
 
     function renderXrayChart(item) {
@@ -644,23 +658,24 @@
         if (item.sinyal === "AL") {
             sinyalSpan.className = "stat-value stat-win";
             sinyalSpan.style.color = "";
-            sinyalSpan.innerHTML = "<i class='bi bi-arrow-up-right-circle-fill me-1'></i> AL (Yeni Kesişim)";
+            sinyalSpan.innerHTML = "<i class='bi bi-arrow-up-right-circle-fill me-1'></i> Trend Girişi (modelde yeni pozisyon)";
         } else if (item.sinyal === "TUT") {
             sinyalSpan.className = "stat-value";
             sinyalSpan.style.color = "var(--accent)";
-            sinyalSpan.innerHTML = "<i class='bi bi-shield-check me-1'></i> TUT (Trend Devam Ediyor)";
+            sinyalSpan.innerHTML = "<i class='bi bi-shield-check me-1'></i> Trendde (model pozisyonda)";
         } else if (item.sinyal === "SAT") {
             sinyalSpan.className = "stat-value stat-loss";
             sinyalSpan.style.color = "";
-            sinyalSpan.innerHTML = "<i class='bi bi-shield-exclamation me-1'></i> SAT (Nakite Geç)";
+            sinyalSpan.innerHTML = "<i class='bi bi-shield-exclamation me-1'></i> Trend Çıkışı (model nakde geçti)";
         } else {
             sinyalSpan.className = "stat-value";
             sinyalSpan.style.color = "var(--text-muted)";
-            sinyalSpan.innerHTML = "<i class='bi bi-hourglass-split me-1'></i> İZLE (Nakitte / PPF)";
+            sinyalSpan.innerHTML = "<i class='bi bi-hourglass-split me-1'></i> Nötr (model nakitte / PPF)";
         }
 
-        new bootstrap.Modal(document.getElementById('xrayModal')).show();
-        setTimeout(() => renderXrayChart(item), 200);
+        const mEl = document.getElementById('xrayModal');
+        mEl.addEventListener('shown.bs.modal', () => renderXrayChart(item), { once: true });
+        bootstrap.Modal.getOrCreateInstance(mEl).show();
     }
 
     function renderMainApexChart() {
@@ -674,13 +689,12 @@
             bistData = globalPerformans.grafik.bist;
             categories = globalPerformans.grafik.tarihler;
         } else {
-            algoData = [100, 150, 210];
-            bistData = [100, 120, 145];
-            categories = ["Başlangıç", "Orta", "Bugün"];
+            document.querySelector("#tvchart").innerHTML = '<div class="text-center py-5" style="color: var(--text-muted);">Grafik verisi henüz yok.</div>';
+            return;
         }
 
         var options = {
-            series: [{ name: 'QuantBIST Algoritma (100 ₺ Baz)', data: algoData }, { name: 'BIST100 Al-Bekle (100 ₺ Baz)', data: bistData }],
+            series: [{ name: 'Algoritma · backtest (100 ₺ baz)', data: algoData }, { name: 'Evren Al-Bekle · 110 varlık, eşit ağırlık (100 ₺ baz)', data: bistData }],
             chart: { type: 'area', height: 380, toolbar: { show: false }, fontFamily: 'Inter, sans-serif', background: 'transparent' },
             colors: ['#10b981', '#52525b'],
             fill: { type: ['gradient', 'solid'], gradient: { shadeIntensity: 1, opacityFrom: 0.4, opacityTo: 0.0, stops: [0, 100] } },
@@ -721,6 +735,8 @@
             globalSignals = data.sinyaller || [];
             globalPerformans = data.performans || null;
             document.getElementById('lastUpdate').innerText = data.guncellenme_tarihi || '-';
+            const dm = (data.guncellenme_tarihi || '').match(/(\d+)\.(\d+)\.(\d+) (\d+):(\d+)/);
+            if (dm && Date.now() - new Date(+dm[3], +dm[2] - 1, +dm[1], +dm[4], +dm[5]) > 4 * 864e5) document.getElementById('lastUpdate').insertAdjacentHTML('beforeend', ' <span style="color: var(--red);">· veri 4 günden eski</span>');
             
             if (data.portfoy) {
                 renderRealPortfolioCard(data.portfoy, data.performans);
@@ -736,6 +752,13 @@
         }
     }
 
+    document.querySelectorAll('.custom-table thead th').forEach((th, i) => {
+        const k = ['hisse', 'sinyal', 'fiyat', 'strateji', 'stop', 'getiri'][i];
+        th.dataset.k = k; th.title = 'Sırala';
+        th.addEventListener('click', () => { sortDir = sortKey === k ? -sortDir : 1; sortKey = k; filterTable(); });
+    });
+    const h0 = location.hash.slice(1);
+    if (['radar', 'backtest', 'about', 'contact'].includes(h0)) switchTab(h0);
     loadLiveSignals();
 </script>
 
