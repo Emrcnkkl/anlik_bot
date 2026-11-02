@@ -72,7 +72,7 @@
             font-size: 0.9rem; transition: all 0.2s ease;
         }
         .search-box:focus { border-color: var(--accent); background-color: rgba(255,255,255,0.06); }
-        .filter-chips { display: flex; gap: 8px; }
+        .filter-chips { display: flex; gap: 8px; flex-wrap: wrap; }
         .chip {
             background-color: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 20px;
             padding: 6px 16px; font-size: 0.85rem; font-weight: 500; color: var(--text-muted);
@@ -81,6 +81,7 @@
         .chip:hover { background-color: rgba(255,255,255,0.1); color: var(--text-main); }
         .chip.active { background-color: var(--accent); color: #fff; border-color: var(--accent); }
         .chip.active-al { background-color: rgba(16, 185, 129, 0.2); color: var(--green); border-color: rgba(16, 185, 129, 0.5); }
+        .chip.active-tut { background-color: rgba(59, 130, 246, 0.2); color: var(--accent); border-color: rgba(59, 130, 246, 0.5); }
         .chip.active-sat { background-color: rgba(239, 68, 68, 0.2); color: var(--red); border-color: rgba(239, 68, 68, 0.5); }
 
         /* Tablo */
@@ -151,11 +152,16 @@
             <i class="bi bi-list fs-2"></i>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto">
+            <ul class="navbar-nav ms-auto align-items-lg-center">
                 <li class="nav-item"><a class="nav-link active" id="nav-radar" onclick="switchTab('radar')">Canlı Radar</a></li>
                 <li class="nav-item"><a class="nav-link" id="nav-backtest" onclick="switchTab('backtest')">Performans</a></li>
                 <li class="nav-item"><a class="nav-link" id="nav-about" onclick="switchTab('about')">Mimari</a></li>
                 <li class="nav-item"><a class="nav-link" id="nav-contact" onclick="switchTab('contact')">İletişim</a></li>
+                <li class="nav-item">
+                    <a class="nav-link" onclick="startOnboardingTour(true)" title="Rehberi Başlat">
+                        <i class="bi bi-question-circle"></i>
+                    </a>
+                </li>
             </ul>
         </div>
     </div>
@@ -183,6 +189,7 @@
             <div class="filter-chips">
                 <div class="chip active" id="chip-ALL" onclick="setFilter('ALL')">Tümü</div>
                 <div class="chip" id="chip-AL" onclick="setFilter('AL')">Sadece AL</div>
+                <div class="chip" id="chip-TUT" onclick="setFilter('TUT')">Trendde (TUT)</div>
                 <div class="chip" id="chip-SAT" onclick="setFilter('SAT')">Sadece SAT</div>
             </div>
         </div>
@@ -236,6 +243,10 @@
                         <span class="stat-label">İndikatör</span>
                         <span class="stat-value text-white" id="modalStrateji">MACD</span>
                     </div>
+                    <div class="stat-box">
+                        <span class="stat-label">Teknik Stop / Çıkış</span>
+                        <span class="stat-value" style="color: #a1a1aa;" id="modalStop">Trend Çıkışı</span>
+                    </div>
                     <div class="stat-box mb-3" style="border-color: rgba(59, 130, 246, 0.4); background-color: rgba(59, 130, 246, 0.05);">
                         <span class="stat-label" style="color: var(--accent);">Otonom Karar</span>
                         <span class="stat-value" id="modalSinyal">AL</span>
@@ -245,7 +256,7 @@
         </div>
     </div>
 
-    <!-- 2. BÖLÜM: PERFORMANS & BACKTEST (TÜM DETAYLAR BİR ARADA) -->
+    <!-- 2. BÖLÜM: PERFORMANS & BACKTEST -->
     <div id="backtest" class="section-panel">
         <div class="text-center mb-4">
             <h2 class="header-title">Performans Analizi</h2>
@@ -415,7 +426,8 @@
         document.querySelectorAll('.section-panel').forEach(panel => panel.classList.remove('active'));
         document.getElementById(tabId).classList.add('active');
         document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
-        document.getElementById('nav-' + tabId).classList.add('active');
+        const activeNav = document.getElementById('nav-' + tabId);
+        if (activeNav) activeNav.classList.add('active');
         if (tabId === 'backtest' && !isChartRendered) { setTimeout(() => { renderMainApexChart(); isChartRendered = true; }, 300); }
     }
 
@@ -465,10 +477,11 @@
 
     function setFilter(type) {
         currentFilter = type;
-        document.querySelectorAll('.chip').forEach(c => { c.classList.remove('active', 'active-al', 'active-sat'); });
+        document.querySelectorAll('.chip').forEach(c => { c.classList.remove('active', 'active-al', 'active-tut', 'active-sat'); });
         const chip = document.getElementById('chip-' + type);
-        if(type === 'ALL') chip.classList.add('active');
+        if (type === 'ALL') chip.classList.add('active');
         else if (type === 'AL') chip.classList.add('active-al');
+        else if (type === 'TUT') chip.classList.add('active-tut');
         else if (type === 'SAT') chip.classList.add('active-sat');
         filterTable();
     }
@@ -483,16 +496,28 @@
         renderTableRows(filtered);
     }
 
+    function getSignalBadgeHtml(sinyal) {
+        if (sinyal === "AL") {
+            return `<span style="color: var(--green); font-weight: 600;"><i class="bi bi-arrow-up-right-circle-fill me-1"></i> AL</span>`;
+        } else if (sinyal === "SAT") {
+            return `<span style="color: var(--red); font-weight: 600;"><i class="bi bi-arrow-down-right-circle-fill me-1"></i> SAT</span>`;
+        } else if (sinyal === "TUT") {
+            return `<span style="color: var(--accent); font-weight: 600;"><i class="bi bi-shield-check me-1"></i> TUT</span>`;
+        } else {
+            return `<span style="color: var(--text-muted); font-weight: 500;"><i class="bi bi-dash-circle me-1"></i> İZLE</span>`;
+        }
+    }
+
     function renderTableRows(dataArray) {
         const tbody = document.getElementById('signalTableBody');
         tbody.innerHTML = ""; 
-        if(dataArray.length === 0) {
+        if (dataArray.length === 0) {
             tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">Kriterlere uygun hisse bulunamadı.</td></tr>`;
             return;
         }
         dataArray.forEach((item) => {
             const originalIndex = globalSignals.findIndex(g => g.hisse === item.hisse);
-            let signalHtml = item.sinyal === "AL" ? `<span style="color: var(--green); font-weight: 600;"><i class="bi bi-arrow-up-right-circle-fill me-1"></i> AL</span>` : (item.sinyal === "SAT" ? `<span style="color: var(--red); font-weight: 600;"><i class="bi bi-arrow-down-right-circle-fill me-1"></i> SAT</span>` : `<span style="color: var(--text-muted); font-weight: 500;"><i class="bi bi-dash-circle me-1"></i> TUT</span>`);
+            let signalHtml = getSignalBadgeHtml(item.sinyal);
             let getiriHtml = item.getiri > 0 ? `<span style="color: var(--green); font-weight: 600;">+%${item.getiri}</span>` : `<span style="color: var(--red); font-weight: 600;">%${item.getiri}</span>`;
 
             tbody.innerHTML += `<tr onclick="openXrayModal(${originalIndex})">
@@ -506,18 +531,35 @@
         });
     }
 
-    function renderXrayChart(fiyat, sinyal) {
+    function renderXrayChart(item) {
         if (modalChartInstance) modalChartInstance.destroy();
-        let sparkData = []; let cur = fiyat * (sinyal === 'AL' ? 0.85 : 1.15);
-        for(let i=0; i<20; i++) { cur += (Math.random() - (sinyal === 'AL' ? 0.4 : 0.6)) * (fiyat * 0.02); sparkData.push(Number(cur.toFixed(2))); }
-        sparkData[19] = fiyat;
+        let sparkData = [];
+        
+        // Eğer quantbot.py içinden gerçek son 20 gün verisi gelirse onu kullan, yoksa simüle et
+        if (Array.isArray(item.gecmis) && item.gecmis.length > 1) {
+            sparkData = item.gecmis;
+        } else {
+            let fiyat = item.fiyat;
+            let isBullish = (item.sinyal === 'AL' || item.sinyal === 'TUT');
+            let cur = fiyat * (isBullish ? 0.88 : 1.12);
+            for (let i = 0; i < 20; i++) {
+                cur += (Math.random() - (isBullish ? 0.42 : 0.58)) * (fiyat * 0.02);
+                sparkData.push(Number(cur.toFixed(2)));
+            }
+            sparkData[19] = fiyat;
+        }
+
+        let chartColor = '#a1a1aa';
+        if (item.sinyal === 'AL') chartColor = '#10b981';
+        else if (item.sinyal === 'TUT') chartColor = '#3b82f6';
+        else if (item.sinyal === 'SAT') chartColor = '#ef4444';
 
         var options = {
             series: [{ name: 'Fiyat', data: sparkData }],
             chart: { type: 'area', height: 150, sparkline: { enabled: true }, animations: { enabled: true } },
             stroke: { curve: 'smooth', width: 2 },
             fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.3, opacityTo: 0.0, stops: [0, 100] } },
-            colors: [sinyal === 'AL' ? '#10b981' : (sinyal === 'SAT' ? '#ef4444' : '#a1a1aa')],
+            colors: [chartColor],
             tooltip: { fixed: { enabled: false }, x: { show: false }, y: { title: { formatter: () => '' } }, marker: { show: false } }
         };
         modalChartInstance = new ApexCharts(document.querySelector("#modalChart"), options);
@@ -530,14 +572,29 @@
         document.getElementById('modalFiyat').innerText = item.fiyat + " ₺";
         document.getElementById('modalStrateji').innerText = item.strateji;
         document.getElementById('modalEma').innerText = item.ema200 ? item.ema200 + " ₺" : "Veri Bekleniyor...";
+        document.getElementById('modalStop').innerText = item.stop || "Trend Çıkışı";
         
         let sinyalSpan = document.getElementById('modalSinyal');
-        if (item.sinyal === "AL") { sinyalSpan.className = "stat-value stat-win"; sinyalSpan.innerHTML = "<i class='bi bi-shield-check me-1'></i> AL (Trend Onaylı)"; }
-        else if (item.sinyal === "SAT") { sinyalSpan.className = "stat-value stat-loss"; sinyalSpan.innerHTML = "<i class='bi bi-shield-exclamation me-1'></i> SAT (Nakite Geç)"; }
-        else { sinyalSpan.className = "stat-value"; sinyalSpan.style.color = "var(--text-muted)"; sinyalSpan.innerHTML = "<i class='bi bi-hourglass-split me-1'></i> TUT (Beklemede)"; }
+        if (item.sinyal === "AL") {
+            sinyalSpan.className = "stat-value stat-win";
+            sinyalSpan.style.color = "";
+            sinyalSpan.innerHTML = "<i class='bi bi-arrow-up-right-circle-fill me-1'></i> AL (Yeni Kesişim)";
+        } else if (item.sinyal === "TUT") {
+            sinyalSpan.className = "stat-value";
+            sinyalSpan.style.color = "var(--accent)";
+            sinyalSpan.innerHTML = "<i class='bi bi-shield-check me-1'></i> TUT (Trend Devam Ediyor)";
+        } else if (item.sinyal === "SAT") {
+            sinyalSpan.className = "stat-value stat-loss";
+            sinyalSpan.style.color = "";
+            sinyalSpan.innerHTML = "<i class='bi bi-shield-exclamation me-1'></i> SAT (Nakite Geç)";
+        } else {
+            sinyalSpan.className = "stat-value";
+            sinyalSpan.style.color = "var(--text-muted)";
+            sinyalSpan.innerHTML = "<i class='bi bi-hourglass-split me-1'></i> İZLE (Nakitte / PPF)";
+        }
 
         new bootstrap.Modal(document.getElementById('xrayModal')).show();
-        setTimeout(() => renderXrayChart(item.fiyat, item.sinyal), 200);
+        setTimeout(() => renderXrayChart(item), 200);
     }
 
     function renderMainApexChart() {
@@ -546,7 +603,7 @@
         let algoVal = 100; let bistVal = 100;
         let d = new Date(new Date().getFullYear() - 2, new Date().getMonth(), new Date().getDate()); 
 
-        for(let i=0; i<500; i++) { 
+        for (let i = 0; i < 500; i++) { 
             let year = d.getFullYear(); let month = String(d.getMonth() + 1).padStart(2, '0'); let day = String(d.getDate()).padStart(2, '0');
             bistVal += (Math.random() - 0.48) * 2.5; 
             let algoChange = (Math.random() - 0.42) * 1.8;
@@ -557,9 +614,9 @@
             algoData.push(Number((algoVal * 0.95 + (100 + (94.16 * progress)) * 0.05).toFixed(2)));
             bistData.push(Number((bistVal * 0.95 + (100 + (42.44 * progress)) * 0.05).toFixed(2)));
             categories.push(`${day}.${month}.${year}`);
-            d.setDate(d.getDate() + 1); if(d.getDay() === 6) d.setDate(d.getDate() + 2); 
+            d.setDate(d.getDate() + 1); if (d.getDay() === 6) d.setDate(d.getDate() + 2); 
         }
-        algoData[algoData.length-1] = 194.16; bistData[bistData.length-1] = 142.44;
+        algoData[algoData.length - 1] = 194.16; bistData[bistData.length - 1] = 142.44;
 
         var options = {
             series: [{ name: 'Algoritma', data: algoData }, { name: 'BİST30', data: bistData }],
@@ -575,28 +632,35 @@
         new ApexCharts(document.querySelector("#tvchart"), options).render();
     }
 
-    function startOnboardingTour() {
-        if(!localStorage.getItem('tourCompleted')) {
+    function startOnboardingTour(force = false) {
+        const TOUR_KEY = 'quantbist_tour_v1';
+        if (force || !localStorage.getItem(TOUR_KEY)) {
+            localStorage.setItem(TOUR_KEY, 'true');
             setTimeout(() => {
-                introJs().setOptions({
-                    nextLabel: 'İleri ❯', prevLabel: '❮ Geri', doneLabel: 'Keşfetmeye Başla',
-                    showStepNumbers: false, showProgress: true, exitOnOverlayClick: false
-                }).start().oncomplete(() => localStorage.setItem('tourCompleted', 'true'))
-                  .onexit(() => localStorage.setItem('tourCompleted', 'true'));
-            }, 1000);
+                const tour = introJs();
+                tour.setOptions({
+                    nextLabel: 'İleri ❯',
+                    prevLabel: '❮ Geri',
+                    doneLabel: 'Keşfetmeye Başla',
+                    showStepNumbers: false,
+                    showProgress: true,
+                    exitOnOverlayClick: true
+                });
+                tour.start();
+            }, force ? 100 : 800);
         }
     }
 
     async function loadLiveSignals() {
         try {
-            const response = await fetch('signals.json');
+            const response = await fetch('signals.json?t=' + Date.now());
             if (!response.ok) throw new Error("Veri bulunamadı.");
             const data = await response.json();
             
             globalSignals = data.sinyaller; 
             document.getElementById('lastUpdate').innerText = data.guncellenme_tarihi;
             filterTable();
-            startOnboardingTour();
+            startOnboardingTour(false);
         } catch (error) {
             document.getElementById('signalTableBody').innerHTML = `<tr><td colspan="6" class="text-center py-4" style="color: var(--text-muted);"><i class="bi bi-cloud-slash fs-3 d-block mb-2"></i>Sinyaller şu an yüklenemiyor.</td></tr>`;
         }
