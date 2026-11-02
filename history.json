@@ -1,0 +1,896 @@
+{
+ "kitap": {
+  "kasalar": {
+   "GRAM_ALTIN": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-11-02",
+    "giris_fiyat": null,
+    "son_fiyat": 6359.9001782676005
+   },
+   "AEFES": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 15.430000305175781
+   },
+   "AGHOL": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 25.020000457763672
+   },
+   "AGROT": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 1.090000033378601
+   },
+   "AHGAZ": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 46.060001373291016
+   },
+   "AKBNK": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 60.900001525878906
+   },
+   "AKCNS": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 176.10000610351562
+   },
+   "AKFGY": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 2.1500000953674316
+   },
+   "AKFYE": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 3.2699999809265137
+   },
+   "AKSA": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 9.989999771118164
+   },
+   "AKSEN": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 60.599998474121094
+   },
+   "ALARK": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 91.80000305175781
+   },
+   "ALBRK": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 7.840000152587891
+   },
+   "ALFAS": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 22.299999237060547
+   },
+   "ALTNY": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 10.069999694824219
+   },
+   "ANHYT": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 87.94999694824219
+   },
+   "ANSGR": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 22.18000030517578
+   },
+   "ARCLK": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 67.94999694824219
+   },
+   "ARDYZ": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 50.5
+   },
+   "ASELS": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 347.0
+   },
+   "ASTOR": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 158.89999389648438
+   },
+   "BERA": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 9.170000076293945
+   },
+   "BFREN": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 88.5
+   },
+   "BIENY": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 10.449999809265137
+   },
+   "BIMAS": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 347.5
+   },
+   "BIOEN": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 10.399999618530273
+   },
+   "BOBET": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 13.489999771118164
+   },
+   "BRSAN": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 639.5
+   },
+   "BRYAT": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 1191.0
+   },
+   "BTCIM": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 1.4700000286102295
+   },
+   "CANTE": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 0.9100000262260437
+   },
+   "CCOLA": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 73.0999984741211
+   },
+   "CIMSA": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 38.959999084472656
+   },
+   "CLEBI": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 1143.0
+   },
+   "CWENE": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 13.640000343322754
+   },
+   "DOAS": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 149.1999969482422
+   },
+   "DOHOL": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 15.850000381469727
+   },
+   "ECILC": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 42.70000076293945
+   },
+   "ECZYT": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 143.89999389648438
+   },
+   "EGEEN": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 3740.0
+   },
+   "EKGYO": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 16.190000534057617
+   },
+   "ENERY": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 13.359999656677246
+   },
+   "ENJSA": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 105.5
+   },
+   "ENKAI": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 76.6500015258789
+   },
+   "EREGL": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 29.65999984741211
+   },
+   "EUPWR": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 39.439998626708984
+   },
+   "EUREN": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 2.180000066757202
+   },
+   "FROTO": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 65.44999694824219
+   },
+   "GARAN": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 125.19999694824219
+   },
+   "GENIL": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 3.490000009536743
+   },
+   "GESAN": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 31.1200008392334
+   },
+   "GOLTS": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 205.89999389648438
+   },
+   "GUBRF": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 250.25
+   },
+   "GWIND": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 16.40999984741211
+   },
+   "HALKB": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 39.599998474121094
+   },
+   "HEKTS": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 1.600000023841858
+   },
+   "IMASM": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 1.25
+   },
+   "ISCTR": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 11.649999618530273
+   },
+   "ISDMR": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 49.65999984741211
+   },
+   "ISGYO": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 17.920000076293945
+   },
+   "ISMEN": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 25.219999313354492
+   },
+   "IZENR": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 3.0199999809265137
+   },
+   "KAYSE": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 2.2799999713897705
+   },
+   "KCAER": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 8.390000343322754
+   },
+   "KCHOL": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 192.8000030517578
+   },
+   "KLSER": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 12.0600004196167
+   },
+   "KONTR": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 1.8300000429153442
+   },
+   "KONYA": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 2735.0
+   },
+   "KRDMD": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 36.15999984741211
+   },
+   "KTLEV": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 3.690000057220459
+   },
+   "LMKDC": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 19.309999465942383
+   },
+   "MAVI": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 33.459999084472656
+   },
+   "MGROS": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 413.5
+   },
+   "MIATK": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 24.040000915527344
+   },
+   "ODAS": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 4.25
+   },
+   "OTKAR": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 300.0
+   },
+   "OYAKC": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 17.8799991607666
+   },
+   "PAPIL": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 5.130000114440918
+   },
+   "PEKGY": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 0.7699999809265137
+   },
+   "PETKM": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 16.239999771118164
+   },
+   "PGSUS": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 115.0
+   },
+   "QUAGR": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 1.2699999809265137
+   },
+   "REEDR": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 2.5
+   },
+   "SAHOL": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 81.0999984741211
+   },
+   "SASA": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 1.4500000476837158
+   },
+   "SDTTR": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 11.5
+   },
+   "SISE": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 32.040000915527344
+   },
+   "SKBNK": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 2.880000114440918
+   },
+   "SMRTG": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 3.5799999237060547
+   },
+   "SOKM": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 51.849998474121094
+   },
+   "TABGD": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 191.0
+   },
+   "TAVHL": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 250.0
+   },
+   "TCELL": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 90.0999984741211
+   },
+   "THYAO": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 242.1999969482422
+   },
+   "TKFEN": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 191.39999389648438
+   },
+   "TOASO": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 211.1999969482422
+   },
+   "TSKB": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 8.9399995803833
+   },
+   "TTKOM": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 46.15999984741211
+   },
+   "TTRAK": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 335.0
+   },
+   "TUKAS": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 1.7699999809265137
+   },
+   "TUPRS": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 343.5
+   },
+   "TURSG": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 3.2899999618530273
+   },
+   "ULKER": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 74.30000305175781
+   },
+   "VAKBN": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 28.8799991607666
+   },
+   "VESBE": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 2.809999942779541
+   },
+   "VESTL": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 11.020000457763672
+   },
+   "YEOTK": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 21.280000686645508
+   },
+   "YKBNK": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 33.959999084472656
+   },
+   "YYLGD": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 5.849999904632568
+   },
+   "ZOREN": {
+    "nakit": 909.0909090909091,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 1.1299999952316284
+   }
+  },
+  "bekleyen": {
+   "GRAM_ALTIN": 0,
+   "AEFES": 0,
+   "AGHOL": 0,
+   "AGROT": 0,
+   "AHGAZ": 1,
+   "AKBNK": 0,
+   "AKCNS": 0,
+   "AKFGY": 0,
+   "AKFYE": 0,
+   "AKSA": 0,
+   "AKSEN": 0,
+   "ALARK": 0,
+   "ALBRK": 0,
+   "ALFAS": 0,
+   "ALTNY": 0,
+   "ANHYT": 0,
+   "ANSGR": 0,
+   "ARCLK": 0,
+   "ARDYZ": 0,
+   "ASELS": 0,
+   "ASTOR": 0,
+   "BERA": 0,
+   "BFREN": 0,
+   "BIENY": 0,
+   "BIMAS": 0,
+   "BIOEN": 0,
+   "BOBET": 0,
+   "BRSAN": 0,
+   "BRYAT": 0,
+   "BTCIM": 0,
+   "CANTE": 0,
+   "CCOLA": 0,
+   "CIMSA": 0,
+   "CLEBI": 0,
+   "CWENE": 0,
+   "DOAS": 0,
+   "DOHOL": 0,
+   "ECILC": 0,
+   "ECZYT": 0,
+   "EGEEN": 0,
+   "EKGYO": 0,
+   "ENERY": 0,
+   "ENJSA": 0,
+   "ENKAI": 0,
+   "EREGL": 0,
+   "EUPWR": 0,
+   "EUREN": 0,
+   "FROTO": 0,
+   "GARAN": 0,
+   "GENIL": 0,
+   "GESAN": 0,
+   "GOLTS": 0,
+   "GUBRF": 0,
+   "GWIND": 0,
+   "HALKB": 0,
+   "HEKTS": 0,
+   "IMASM": 0,
+   "ISCTR": 0,
+   "ISDMR": 0,
+   "ISGYO": 0,
+   "ISMEN": 0,
+   "IZENR": 0,
+   "KAYSE": 0,
+   "KCAER": 0,
+   "KCHOL": 0,
+   "KLSER": 0,
+   "KONTR": 0,
+   "KONYA": 0,
+   "KRDMD": 0,
+   "KTLEV": 0,
+   "LMKDC": 0,
+   "MAVI": 0,
+   "MGROS": 0,
+   "MIATK": 0,
+   "ODAS": 0,
+   "OTKAR": 0,
+   "OYAKC": 0,
+   "PAPIL": 0,
+   "PEKGY": 0,
+   "PETKM": 0,
+   "PGSUS": 0,
+   "QUAGR": 0,
+   "REEDR": 0,
+   "SAHOL": 0,
+   "SASA": 0,
+   "SDTTR": 0,
+   "SISE": 0,
+   "SKBNK": 0,
+   "SMRTG": 0,
+   "SOKM": 0,
+   "TABGD": 0,
+   "TAVHL": 0,
+   "TCELL": 0,
+   "THYAO": 0,
+   "TKFEN": 0,
+   "TOASO": 0,
+   "TSKB": 0,
+   "TTKOM": 0,
+   "TTRAK": 0,
+   "TUKAS": 0,
+   "TUPRS": 0,
+   "TURSG": 0,
+   "ULKER": 0,
+   "VAKBN": 0,
+   "VESBE": 0,
+   "VESTL": 0,
+   "YEOTK": 0,
+   "YKBNK": 0,
+   "YYLGD": 0,
+   "ZOREN": 0
+  },
+  "baslangic": "2026-11-02"
+ },
+ "olaylar": [],
+ "deger_serisi": [
+  {
+   "tarih": "2026-11-02",
+   "deger": 100000.0
+  }
+ ]
+}
