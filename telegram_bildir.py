@@ -23,9 +23,11 @@ def mesaj(mod):
     p, sig = s.get("portfoy", {}), s.get("sinyaller", [])
     son = (s.get("canli", {}).get("tarihler") or [""])[-1]
     giris = [d["hisse"] for d in sig if d.get("sinyal") == "AL"]; cikis = [d["hisse"] for d in sig if d.get("sinyal") == "SAT"]
+    gen = sum(1 for d in sig if d.get("fiyat") and d.get("ema200") and d["fiyat"] > d["ema200"])
     sg = p.get("saglik", {})
     fon = (f"Model portföy (simülasyon): {tl(p['guncel_bakiye'])} (%{p['net_kar_yuzde']:+.2f}) · Açık pozisyon: {p.get('aktif_pozisyon', 0)}/{p.get('toplam_varlik', 0)}"
            f" · Kill-Switch: {sg.get('durum', '-')}") if p else "Model portföy verisi yok."
+    fon += f"\nPiyasa genişliği: {gen}/{len(sig)} varlık EMA200 üzerinde"
     uyari = ""
     try:
         g = datetime.strptime(s.get("guncellenme_tarihi", ""), "%d.%m.%Y %H:%M")

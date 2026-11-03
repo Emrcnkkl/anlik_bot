@@ -204,6 +204,7 @@
         </div>
 
         <div class="info-card mb-4" style="padding: 20px;"><h4 class="mb-3 px-2">Canlı model portföy eğrisi</h4><div id="liveChart" style="min-height: 300px;"></div></div>
+        <div id="genislik" class="desc-text mb-3" style="font-size: 0.85rem;"></div>
 
         <!-- ARAMA VE FİLTRELEME (CHIPS) -->
         <div class="filter-container" data-title="Akıllı Filtreleme" data-intro="Hisseleri saniyeler içinde tarayın. Arama kutusuna hisse adını yazabilir veya butonlarla filtreleyebilirsiniz.">
@@ -286,6 +287,7 @@
                     <div class="stat-box"><span class="stat-label">Out-of-sample: Algoritma vs Al-Bekle</span><span class="stat-value" id="modalOos">-</span></div>
                     <div class="stat-box"><span class="stat-label">21 gösterge oylaması</span><span class="stat-value" id="modalOylama">-</span></div>
                     <div class="stat-box"><span class="stat-label">Trend matrisi (1S · 4S · 1G · 1H)</span><span class="stat-value" id="modalMtf" style="font-size: 0.85rem;">-</span></div>
+                    <div class="stat-box"><span class="stat-label">Olası neden (Nötr ise)</span><span class="stat-value" id="modalNeden" style="font-size: 0.85rem;">-</span></div>
                     <div class="stat-box mb-0" style="border-color: rgba(59, 130, 246, 0.4); background-color: rgba(59, 130, 246, 0.05);">
                         <span class="stat-label" style="color: var(--accent);">Model Durumu</span>
                         <span class="stat-value" id="modalSinyal">AL</span>
@@ -695,6 +697,8 @@
         else { oosEl.className = 'stat-value text-white'; oosEl.innerText = '-'; }
         const oy = item.oylama; document.getElementById('modalOylama').innerText = oy ? `${oy.etiket} (${oy.al} Al · ${oy.notr} Nötr · ${oy.sat} Sat)` : '-';
         const mt = item.mtf; document.getElementById('modalMtf').innerText = mt ? ['1S', '4S', '1G', '1H'].map(x => `${x}: ${mt[x] ?? '-'}`).join(' · ') : '-';
+        const stN = parseFloat(item.stop);
+        document.getElementById('modalNeden').innerText = item.sinyal !== 'İZLE' ? '-' : (!isNaN(stN) && item.fiyat < stN) ? `Fiyat trend kalkanının altında (kalkan ${stN}, fark %${((item.fiyat / stN - 1) * 100).toFixed(1)})` : `Kalkanın üstünde. ADX ${item.adx} veya stratejinin sinyali yetersiz`;
         let sinyalSpan = document.getElementById('modalSinyal');
         if (item.sinyal === "AL") {
             sinyalSpan.className = "stat-value stat-win";
@@ -774,6 +778,11 @@
         document.getElementById('oosWin').innerText = o.yenen_sayisi + ' / ' + o.liste.length + ' Varlık';
         document.getElementById('oosAvg').innerHTML = `<span class="${o.bist_ort >= 0 ? 'text-white' : 'stat-loss'}">${sg(o.bist_ort)}</span> <span style="color: var(--text-muted); font-weight:400;">|</span> <span class="${o.algo_ort >= 0 ? 'stat-win' : 'stat-loss'}">${sg(o.algo_ort)}</span>`;
     }
+    function renderGenislik(list) {
+        const el = document.getElementById('genislik'); if (!el || !list || !list.length) return;
+        const ust = list.filter(d => d.fiyat > d.ema200).length;
+        el.innerHTML = `<i class="bi bi-bar-chart-line me-1"></i> Piyasa genişliği: ${list.length} varlığın <strong>${ust}</strong>'i EMA200 üzerinde. Model trend takipçisidir, çoğunluk EMA200 altındaysa nakitte kalması beklenen davranıştır.`;
+    }
     function renderKill(p) {
         const sg = p && p.saglik; if (!sg) return;
         const renk = sg.durum === 'Sağlıklı' ? 'var(--green)' : sg.durum === 'Dikkat' ? '#f59e0b' : 'var(--red)';
@@ -840,6 +849,7 @@
             renderHistory(data.islem_gecmisi, data.islem_ozeti);
             renderLiveChart(data.canli);
             renderKill(data.portfoy);
+            renderGenislik(data.sinyaller);
             renderPositions(data.pozisyonlar);
             filterTable();
             startOnboardingTour(false);
