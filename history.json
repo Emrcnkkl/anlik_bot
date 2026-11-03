@@ -1,0 +1,452 @@
+{
+ "evren": [
+  "ASELS.IS",
+  "AKBNK.IS",
+  "ASTOR.IS",
+  "EREGL.IS",
+  "BIMAS.IS",
+  "GARAN.IS",
+  "EKGYO.IS",
+  "CWENE.IS",
+  "HALKB.IS",
+  "FROTO.IS",
+  "GUBRF.IS",
+  "BRSAN.IS",
+  "EUPWR.IS",
+  "ENKAI.IS",
+  "GESAN.IS",
+  "AEFES.IS",
+  "ENERY.IS",
+  "AKSEN.IS",
+  "HEKTS.IS",
+  "GENIL.IS",
+  "BTCIM.IS",
+  "CCOLA.IS",
+  "ALARK.IS",
+  "ENJSA.IS",
+  "ARDYZ.IS",
+  "ECILC.IS",
+  "ALTNY.IS",
+  "CANTE.IS",
+  "CIMSA.IS",
+  "AHGAZ.IS",
+  "GRAM_ALTIN"
+ ],
+ "kitap": {
+  "kasalar": {
+   "ASELS": {
+    "nakit": 3225.8064516129034,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 347.0,
+    "kilit": 0,
+    "dg": [
+     3225.8064516129034
+    ],
+    "dg_tarih": "2026-10-30"
+   },
+   "AKBNK": {
+    "nakit": 3225.8064516129034,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 60.900001525878906,
+    "kilit": 0,
+    "dg": [
+     3225.8064516129034
+    ],
+    "dg_tarih": "2026-10-30"
+   },
+   "ASTOR": {
+    "nakit": 3225.8064516129034,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 158.89999389648438,
+    "kilit": 0,
+    "dg": [
+     3225.8064516129034
+    ],
+    "dg_tarih": "2026-10-30"
+   },
+   "EREGL": {
+    "nakit": 3225.8064516129034,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 29.65999984741211,
+    "kilit": 0,
+    "dg": [
+     3225.8064516129034
+    ],
+    "dg_tarih": "2026-10-30"
+   },
+   "BIMAS": {
+    "nakit": 3225.8064516129034,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 347.5,
+    "kilit": 0,
+    "dg": [
+     3225.8064516129034
+    ],
+    "dg_tarih": "2026-10-30"
+   },
+   "GARAN": {
+    "nakit": 3225.8064516129034,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 125.19999694824219,
+    "kilit": 0,
+    "dg": [
+     3225.8064516129034
+    ],
+    "dg_tarih": "2026-10-30"
+   },
+   "EKGYO": {
+    "nakit": 3225.8064516129034,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 16.190000534057617,
+    "kilit": 0,
+    "dg": [
+     3225.8064516129034
+    ],
+    "dg_tarih": "2026-10-30"
+   },
+   "CWENE": {
+    "nakit": 3225.8064516129034,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 13.640000343322754,
+    "kilit": 0,
+    "dg": [
+     3225.8064516129034
+    ],
+    "dg_tarih": "2026-10-30"
+   },
+   "HALKB": {
+    "nakit": 3225.8064516129034,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 39.599998474121094,
+    "kilit": 0,
+    "dg": [
+     3225.8064516129034
+    ],
+    "dg_tarih": "2026-10-30"
+   },
+   "FROTO": {
+    "nakit": 3225.8064516129034,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 65.44999694824219,
+    "kilit": 0,
+    "dg": [
+     3225.8064516129034
+    ],
+    "dg_tarih": "2026-10-30"
+   },
+   "GUBRF": {
+    "nakit": 3225.8064516129034,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 250.25,
+    "kilit": 0,
+    "dg": [
+     3225.8064516129034
+    ],
+    "dg_tarih": "2026-10-30"
+   },
+   "BRSAN": {
+    "nakit": 3225.8064516129034,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 639.5,
+    "kilit": 0,
+    "dg": [
+     3225.8064516129034
+    ],
+    "dg_tarih": "2026-10-30"
+   },
+   "EUPWR": {
+    "nakit": 3225.8064516129034,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 39.439998626708984,
+    "kilit": 0,
+    "dg": [
+     3225.8064516129034
+    ],
+    "dg_tarih": "2026-10-30"
+   },
+   "ENKAI": {
+    "nakit": 3225.8064516129034,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 76.6500015258789,
+    "kilit": 0,
+    "dg": [
+     3225.8064516129034
+    ],
+    "dg_tarih": "2026-10-30"
+   },
+   "GESAN": {
+    "nakit": 3225.8064516129034,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 31.1200008392334,
+    "kilit": 0,
+    "dg": [
+     3225.8064516129034
+    ],
+    "dg_tarih": "2026-10-30"
+   },
+   "AEFES": {
+    "nakit": 3225.8064516129034,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 15.430000305175781,
+    "kilit": 0,
+    "dg": [
+     3225.8064516129034
+    ],
+    "dg_tarih": "2026-10-30"
+   },
+   "ENERY": {
+    "nakit": 3225.8064516129034,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 13.359999656677246,
+    "kilit": 0,
+    "dg": [
+     3225.8064516129034
+    ],
+    "dg_tarih": "2026-10-30"
+   },
+   "AKSEN": {
+    "nakit": 3225.8064516129034,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 60.599998474121094,
+    "kilit": 0,
+    "dg": [
+     3225.8064516129034
+    ],
+    "dg_tarih": "2026-10-30"
+   },
+   "HEKTS": {
+    "nakit": 3225.8064516129034,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 1.600000023841858,
+    "kilit": 0,
+    "dg": [
+     3225.8064516129034
+    ],
+    "dg_tarih": "2026-10-30"
+   },
+   "GENIL": {
+    "nakit": 3225.8064516129034,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 3.490000009536743,
+    "kilit": 0,
+    "dg": [
+     3225.8064516129034
+    ],
+    "dg_tarih": "2026-10-30"
+   },
+   "BTCIM": {
+    "nakit": 3225.8064516129034,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 1.4700000286102295,
+    "kilit": 0,
+    "dg": [
+     3225.8064516129034
+    ],
+    "dg_tarih": "2026-10-30"
+   },
+   "CCOLA": {
+    "nakit": 3225.8064516129034,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 73.0999984741211,
+    "kilit": 0,
+    "dg": [
+     3225.8064516129034
+    ],
+    "dg_tarih": "2026-10-30"
+   },
+   "ALARK": {
+    "nakit": 3225.8064516129034,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 91.80000305175781,
+    "kilit": 0,
+    "dg": [
+     3225.8064516129034
+    ],
+    "dg_tarih": "2026-10-30"
+   },
+   "ENJSA": {
+    "nakit": 3225.8064516129034,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 105.5,
+    "kilit": 0,
+    "dg": [
+     3225.8064516129034
+    ],
+    "dg_tarih": "2026-10-30"
+   },
+   "ARDYZ": {
+    "nakit": 3225.8064516129034,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 50.5,
+    "kilit": 0,
+    "dg": [
+     3225.8064516129034
+    ],
+    "dg_tarih": "2026-10-30"
+   },
+   "ECILC": {
+    "nakit": 3225.8064516129034,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 42.70000076293945,
+    "kilit": 0,
+    "dg": [
+     3225.8064516129034
+    ],
+    "dg_tarih": "2026-10-30"
+   },
+   "ALTNY": {
+    "nakit": 3225.8064516129034,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 10.069999694824219,
+    "kilit": 0,
+    "dg": [
+     3225.8064516129034
+    ],
+    "dg_tarih": "2026-10-30"
+   },
+   "CANTE": {
+    "nakit": 3225.8064516129034,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 0.9100000262260437,
+    "kilit": 0,
+    "dg": [
+     3225.8064516129034
+    ],
+    "dg_tarih": "2026-10-30"
+   },
+   "CIMSA": {
+    "nakit": 3225.8064516129034,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 38.959999084472656,
+    "kilit": 0,
+    "dg": [
+     3225.8064516129034
+    ],
+    "dg_tarih": "2026-10-30"
+   },
+   "AHGAZ": {
+    "nakit": 3225.8064516129034,
+    "adet": 0.0,
+    "son_tarih": "2026-10-30",
+    "giris_fiyat": null,
+    "son_fiyat": 46.060001373291016,
+    "kilit": 0,
+    "dg": [
+     3225.8064516129034
+    ],
+    "dg_tarih": "2026-10-30"
+   },
+   "GRAM_ALTIN": {
+    "nakit": 3225.8064516129034,
+    "adet": 0.0,
+    "son_tarih": "2026-11-02",
+    "giris_fiyat": null,
+    "son_fiyat": 6326.315322154946,
+    "kilit": 0,
+    "dg": [
+     3225.8064516129034
+    ],
+    "dg_tarih": "2026-11-02"
+   }
+  },
+  "bekleyen": {
+   "ASELS": 0,
+   "AKBNK": 0,
+   "ASTOR": 0,
+   "EREGL": 0,
+   "BIMAS": 0,
+   "GARAN": 0,
+   "EKGYO": 0,
+   "CWENE": 0,
+   "HALKB": 0,
+   "FROTO": 0,
+   "GUBRF": 0,
+   "BRSAN": 0,
+   "EUPWR": 0,
+   "ENKAI": 0,
+   "GESAN": 0,
+   "AEFES": 0,
+   "ENERY": 0,
+   "AKSEN": 0,
+   "HEKTS": 0,
+   "GENIL": 0,
+   "BTCIM": 0,
+   "CCOLA": 0,
+   "ALARK": 0,
+   "ENJSA": 0,
+   "ARDYZ": 0,
+   "ECILC": 0,
+   "ALTNY": 0,
+   "CANTE": 0,
+   "CIMSA": 0,
+   "AHGAZ": 0,
+   "GRAM_ALTIN": 0
+  },
+  "baslangic": "2026-11-02"
+ },
+ "olaylar": [],
+ "deger_serisi": [
+  {
+   "tarih": "2026-11-02",
+   "deger": 100000.0
+  }
+ ]
+}
