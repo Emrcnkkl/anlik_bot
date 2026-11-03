@@ -14,6 +14,7 @@ KOMISYON = 0.002
 WF_EGITIM = 250   # walk-forward: strateji seçimi için geriye bakış (işlem günü)
 WF_TEST = 63      # walk-forward: seçilen stratejinin görmeden uygulandığı dönem
 HISTORY_DOSYASI = "history.json"
+WF_PENCERE = 750   # out-of-sample için kullanılan toplam geçmiş (işlem günü, 3 yıllık verinin tamamı)
 SLIPAJ = 0.001    # her işlemde yön başına kayma varsayımı (binde 1)
 LIKIT_N = 30       # likit evren: son 60 günde ortalama TL hacmi en yüksek N hisse (+ Gram Altın)
 EVREN_MANUEL = None  # örn. ["AKBNK.IS", "ASELS.IS", ...] verirsen likidite sıralaması yerine bu liste kullanılır
@@ -303,6 +304,23 @@ def en_iyi_strateji(adaylar, k, s, e, fiy, acl, atr, adx):
                 en_iyi, secim = skor, (ad, rej, sn)
     return secim
 
+def aday_olustur(w, sk_s):
+    """w penceresi için tüm aday stratejileri ve girdi dizilerini üretir."""
+    ad = []
+    for h, y in macd_ayarlari:
+        d, s = ind_macd(w['Close'], h, y); ad.append(("MACD", f"H:{h}/Y:{y}", d, s))
+    for p_, c_ in st_ayarlari:
+        d, s = ind_supertrend(w, p_, c_); ad.append(("SuperTrend", f"P:{p_}/Ç:{c_}", d, s))
+    for a, b in ema_ayarlari:
+        d, s = ind_ema_cross(w['Close'], a, b); ad.append(("EMA Kesişim", f"{a}/{b}", d, s))
+    for per in donchian_ayarlari:
+        d, s = ind_donchian(w['High'], w['Low'], w['Close'], per); ad.append(("Donchian", f"K:{per}", d, s))
+    sk = sk_s.reindex(w.index).fillna(0.0).values; baz = w['Low'].rolling(20).min().shift(1).fillna(0.0).values
+    for g_, c_ in OYLAMA_ESIKLERI:
+        ad.append(("Oylama", f"G:{g_}/Ç:{c_}", ind_oylama(sk, g_, c_), baz))
+    k = {"EMA200": w['EMA200'].values, "EMA100": w['EMA100'].values}
+    return ad, k, w['Close'].values, w['Open'].values, w['ATR'].values, w['ADX'].values
+
 def walk_forward(adaylar, k, fiy, acl, atr, adx):
     """Her WF_TEST günde, yalnızca önceki WF_EGITIM günle seçilen strateji sonraki döneme görmeden uygulanır."""
     n = len(fiy); katsayi = 1.0; egri = []
@@ -479,9 +497,11 @@ for hisse in bist100:
         perf6.append({"hisse": temiz, "bh": bh_6, "algo": algo_6, "yendi": bool(algo_6 > bh_6)})
         is_egrileri.append(pd.Series(bakiye, index=test.index)); bh_egrileri.append(pd.Series(fiy / fiy[0] * 100.0, index=test.index))
 
-        if n >= WF_EGITIM + 20:   # OUT-OF-SAMPLE (walk-forward)
-            egri = walk_forward(adaylar, k, fiy, acl, atr, adx)
-            idx = test.index[WF_EGITIM:]; bh_c = fiy[WF_EGITIM:] / fiy[WF_EGITIM - 1]
+        uzun = df.tail(WF_PENCERE).copy()
+        if len(uzun) >= WF_PENCERE - 50:   # OUT-OF-SAMPLE: tüm geçmişte rolling walk-forward
+            ad_u, k_u, fiy_u, acl_u, atr_u, adx_u = aday_olustur(uzun, sk_s)
+            egri = walk_forward(ad_u, k_u, fiy_u, acl_u, atr_u, adx_u)
+            idx = uzun.index[WF_EGITIM:]; bh_c = fiy_u[WF_EGITIM:] / fiy_u[WF_EGITIM - 1]
             oa, ob = round((egri[-1] - 1.0) * 100.0, 1), round((bh_c[-1] - 1.0) * 100.0, 1)
             perf_oos.append({"hisse": temiz, "bh": ob, "algo": oa, "yendi": bool(oa > ob)})
             site_verileri[-1]["oos_getiri"], site_verileri[-1]["oos_bh"] = oa, ob
@@ -503,7 +523,7 @@ with open(HISTORY_DOSYASI, "w", encoding="utf-8") as f:
 def risk(v):
     v = np.array(v, dtype=float)
     if len(v) < 30: return None
-    r = np.diff(v) / v[:-1]; sd = r.std(ddof=1); dsd = np.sqrt(np.mean(np.minimum(r, 0.0) ** 2)); pk = np.maximum.accumulate(v)
+    r = np.diff(v) / v[:-1] - PPF_GUNLUK_GETIRI; sd = r.std(ddof=1); dsd = np.sqrt(np.mean(np.minimum(r, 0.0) ** 2)); pk = np.maximum.accumulate(v)
     return {"sharpe": round(float(r.mean() / sd * np.sqrt(252)), 2) if sd > 0 else None, "sortino": round(float(r.mean() / dsd * np.sqrt(252)), 2) if dsd > 0 else None,
             "max_dd": round(float(np.max((pk - v) / pk) * 100.0), 1), "getiri": round(float((v[-1] / v[0] - 1.0) * 100.0), 1)}
 
@@ -532,8 +552,10 @@ toplam = len(site_verileri)
 aktif = sum(1 for kz in kasalar.values() if kz["adet"] > 0)
 nakit_deger = sum(kz["nakit"] for kz in kasalar.values())
 seri = gecmis["deger_serisi"]
-oos = ozet(perf_oos); oos["gun"] = max(0, 500 - WF_EGITIM); oos["grafik"] = egri_paketi(oos_algo_egrileri, oos_bh_egrileri)
+oos = ozet(perf_oos); oos["grafik"] = egri_paketi(oos_algo_egrileri, oos_bh_egrileri); oos["gun"] = len(oos["grafik"]["algo"])
 oos["risk"] = {"algo": risk(oos["grafik"]["algo"]), "bist": risk(oos["grafik"]["bist"])}
+oos["grafik"]["nakit"] = [round(100.0 * (1.0 + PPF_GUNLUK_GETIRI) ** (i + 1), 2) for i in range(oos["gun"])]   # aynı dönemde nakit (PPF) kıyası
+oos["nakit_getiri"] = round(oos["grafik"]["nakit"][-1] - 100.0, 1) if oos["gun"] else None
 
 tarihler_c = [x["tarih"] for x in seri]; bas = gecmis["kitap"]["baslangic"]
 try: xu = sayi(toplu_veri["XU100.IS"]['Close'])

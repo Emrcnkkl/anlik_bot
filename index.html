@@ -307,7 +307,8 @@
             <p class="desc-text px-3 mb-3">Strateji her 63 işlem gününde yalnızca önceki 250 günle seçilir ve sonraki 63 günde, o günleri görmeden uygulanır. Geçmişe uydurma etkisini ölçmenin daha dürüst yoludur.</p>
             <div class="px-3"><div class="stat-box"><span class="stat-label">Al-Bekle'yi yenen</span><span class="stat-value text-white" id="oosWin">-</span></div>
             <div class="stat-box"><span class="stat-label">Al-Bekle vs Algoritma (medyan)</span><span class="stat-value" id="oosAvg">-</span></div></div>
-            <div class="px-3 mt-2"><div class="stat-box"><span class="stat-label">Sharpe | Sortino (algoritma)</span><span class="stat-value text-white" id="oosSharpe">-</span></div>
+            <div class="px-3 mt-2"><div class="stat-box"><span class="stat-label">Getiri: Algoritma vs Nakit (PPF)</span><span class="stat-value text-white" id="oosCash">-</span></div>
+            <div class="stat-box"><span class="stat-label">Sharpe | Sortino (algoritma, nakit üzeri)</span><span class="stat-value text-white" id="oosSharpe">-</span></div>
             <div class="stat-box"><span class="stat-label">Max drawdown (algoritma | evren)</span><span class="stat-value text-white" id="oosDd">-</span></div></div>
             <div id="oosChart" class="chart-container mt-3"></div>
         </div>
@@ -419,7 +420,7 @@
             <p><strong>Veri.</strong> Günlük fiyatlar Yahoo Finance'ten alınır (gecikmeli veya hatalı olabilir). Gram altın, ons fiyatı × USD/TRY ÷ 31,1035 ile hesaplanır.</p>
             <p><strong>İşlem varsayımları.</strong> Karar gün sonu kapanışıyla verilir, işlem ertesi gün açılış fiyatıyla yapılır. Her işlemde %0,2 komisyon ve %0,1 slipaj düşülür. Nakitte bekleyen bakiyeye günlük %0,11 PPF getirisi işlenir. Korumalar: stop sonrası 4 işlem günü yeniden giriş yasağı, açılış dünkü kapanışın %3,5+ altındaysa stop beklemeden çıkış, pozisyonda 3 günde %6 erimede 7 günlük devre kesici. Günlük %20+ veri sıçramaları ertesi gün geri dönüyorsa hatalı sayılıp onarılır. 1S/4S/1G/1H trend matrisi yalnızca göstergedir, işlem kararına girmez.</p>
             <p><strong>Strateji seçimi.</strong> Her varlık için 18 aday (MACD, SuperTrend, EMA kesişimi, Donchian ve 21 göstergeli oylama) 4 rejim ayarıyla denenir (72 kombinasyon). Seçim: Al-Bekle'yi yenenler arasında en düşük max drawdown. Seçim yalnızca eğitim verisinde yapılır. Bu seçim geçmiş veride yapıldığı için 2 yıllık backtest sonuçları iyimserdir.</p>
-            <p><strong>Out-of-sample.</strong> Her 63 işlem gününde strateji yalnızca önceki 250 günle seçilir ve sonraki 63 günde uygulanır. Bu sonuçlar geçmişe uydurma etkisinden büyük ölçüde arınmıştır, ancak yine de geçmiş veriye dayanır.</p>
+            <p><strong>Out-of-sample.</strong> Her 63 işlem gününde strateji yalnızca önceki 250 günle seçilir ve sonraki 63 günde uygulanır. Bu sonuçlar geçmişe uydurma etkisinden büyük ölçüde arınmıştır, ancak yine de geçmiş veriye dayanır. Test dönemi 3 yıllık verinin son yaklaşık 500 işlem günüdür. Sharpe ve Sortino nakit (PPF) getirisinin üzerinden hesaplanır ve algoritmanın getirisi aynı dönemdeki nakit getirisiyle ayrıca kıyaslanır. PPF getirisi bir varsayımdır, gerçek faiz farklıysa sonuçlar değişir.</p>
             <p><strong>Canlı model portföy.</strong> İlk kayıt gününden itibaren eşit ağırlıklı ve 100.000 ₺ ile başlayan bir simülasyondur. İşlemler kaydedilir ve sonradan değiştirilmez. Gerçek para değildir.</p>
             <p class="mb-0"><strong>Modellenmeyenler.</strong> Evren, son 60 günde en likit hisseler ve gram altındır (survivorship bias). Likidite, tavan-taban, vergi, temettü ve bedelsiz işlemleri ayrıca modellenmemiştir. İçerik yatırım tavsiyesi değildir.</p>
         </div></div>
@@ -779,6 +780,10 @@
         document.getElementById('killBadge').innerHTML = `<i class="bi bi-shield-check me-1" style="color: ${renk};"></i> Kill-Switch: ${sg.durum} · DD %${sg.dd} · Kilitli: ${sg.kilitli}`;
     }
     function renderOosRisk(o) {
+        if (o && o.nakit_getiri != null && o.risk && o.risk.algo) {
+            const a = o.risk.algo.getiri, c = o.nakit_getiri;
+            document.getElementById('oosCash').innerHTML = `<span class="${a >= c ? 'stat-win' : 'stat-loss'}">%${a}</span> <span style="color: var(--text-muted); font-weight: 400;">vs</span> %${c}`;
+        }
         const r = o && o.risk; if (!r || !r.algo || !r.bist) return;
         document.getElementById('oosSharpe').innerText = `${r.algo.sharpe ?? '-'} | ${r.algo.sortino ?? '-'}`;
         document.getElementById('oosDd').innerText = `-%${r.algo.max_dd} | -%${r.bist.max_dd}`;
@@ -799,9 +804,9 @@
     function renderOosChart() {
         const g = globalPerformans && globalPerformans.oos && globalPerformans.oos.grafik, el = document.querySelector('#oosChart');
         if (!g || !g.algo || !g.algo.length) { el.innerHTML = '<div class="text-center py-4" style="color: var(--text-muted);">Henüz veri yok.</div>'; return; }
-        new ApexCharts(el, { series: [{ name: 'Algoritma · out-of-sample', data: g.algo }, { name: 'Evren Al-Bekle', data: g.bist }],
-            chart: { type: 'area', height: 300, toolbar: { show: false }, fontFamily: 'Inter, sans-serif', background: 'transparent' }, colors: ['#10b981', '#52525b'],
-            fill: { type: ['gradient', 'solid'], gradient: { opacityFrom: 0.4, opacityTo: 0 } }, dataLabels: { enabled: false }, stroke: { curve: 'smooth', width: [3, 2] },
+        new ApexCharts(el, { series: [{ name: 'Algoritma · out-of-sample', data: g.algo }, { name: 'Evren Al-Bekle', data: g.bist }, { name: 'Nakit (PPF)', data: g.nakit || [] }],
+            chart: { type: 'area', height: 300, toolbar: { show: false }, fontFamily: 'Inter, sans-serif', background: 'transparent' }, colors: ['#10b981', '#52525b', '#f59e0b'],
+            fill: { type: ['gradient', 'solid', 'solid'], gradient: { opacityFrom: 0.4, opacityTo: 0 } }, dataLabels: { enabled: false }, stroke: { curve: 'smooth', width: [3, 2, 2], dashArray: [0, 0, 5] },
             xaxis: { categories: g.tarihler, tickAmount: 6, labels: { style: { colors: '#a1a1aa' } } }, yaxis: { labels: { style: { colors: '#a1a1aa' }, formatter: v => v.toFixed(0) + ' ₺' } },
             grid: { borderColor: '#27272a', strokeDashArray: 4 }, theme: { mode: 'dark' }, legend: { position: 'top', horizontalAlign: 'right', labels: { colors: '#f4f4f5' } } }).render();
     }
