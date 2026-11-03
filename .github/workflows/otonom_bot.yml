@@ -1,13 +1,19 @@
-name: Günlük BIST100 Kantitatif Analiz Botu
+name: Günlük BIST Kantitatif Analiz Botu
 
 on:
   schedule:
-    # 16:00 UTC = 19:00 Türkiye saati (UTC+3). Kapanış fiyatlarının Yahoo'da netleşmesi için
-    # seans bitişinden bir süre sonraya bırakıldı. Yalnızca hafta içi (1-5) çalışır.
-    - cron: '0 16 * * 1-5'
-  workflow_dispatch: # GitHub üzerinden manuel tetikleme butonu
+    # Saatler UTC. Türkiye = UTC+3. Tam saat başı yoğun olduğu için :05'e kaydırıldı.
+    - cron: '5 7 * * 1-5'    # 10:05 TR  -> sabah bülteni (yalnızca Telegram, veriyi yeniden hesaplamaz)
+    - cron: '5 19 * * 1-5'   # 22:05 TR  -> tam analiz + commit + Telegram
+  workflow_dispatch:
+    inputs:
+      mod:
+        description: 'Çalışma modu'
+        type: choice
+        options: [aksam, sabah]
+        default: aksam
 
-# Aynı anda iki çalışma birbirinin history.json dosyasını ezmesin
+# Aynı anda iki çalışma history.json dosyasını ezmesin
 concurrency:
   group: otonom-bot
   cancel-in-progress: false
@@ -15,32 +21,56 @@ concurrency:
 jobs:
   analiz-yap:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     permissions:
-      contents: write # signals.json ve history.json dosyalarını depoya yazabilmek için
+      contents: write
+    env:
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
 
     steps:
     - name: 📥 Depoyu Klonla
       uses: actions/checkout@v4
+
+    - name: 🧭 Çalışma Modunu Belirle
+      id: mod
+      env:
+        TETIK: ${{ github.event.schedule }}
+        MOD_GIRDI: ${{ inputs.mod }}
+      run: |
+        if [ "$TETIK" = "5 7 * * 1-5" ]; then echo "mod=sabah" >> "$GITHUB_OUTPUT"
+        elif [ -n "$TETIK" ]; then echo "mod=aksam" >> "$GITHUB_OUTPUT"
+        else echo "mod=${MOD_GIRDI:-aksam}" >> "$GITHUB_OUTPUT"
+        fi
 
     - name: 🐍 Python Kurulumu
       uses: actions/setup-python@v5
       with:
         python-version: '3.10'
 
-    - name: 📦 Gerekli Kütüphaneleri Yükle
+    - name: 📦 Kütüphaneleri Yükle
+      if: steps.mod.outputs.mod == 'aksam'
       run: |
         python -m pip install --upgrade pip
         pip install yfinance pandas numpy
 
-    - name: ⚙️ Botu Çalıştır
+    - name: ⚙️ Botu Çalıştır (tam analiz)
+      if: steps.mod.outputs.mod == 'aksam'
       run: python quant_bot.py
 
     - name: 📤 Sonuçları Depoya Yükle (Commit)
+      if: steps.mod.outputs.mod == 'aksam'
       run: |
         git config --global user.name "quant-bot[bot]"
         git config --global user.email "quant-bot[bot]@users.noreply.github.com"
         git add signals.json history.json
-        git commit -m "🤖 Otonom Güncelleme: Günlük BIST100 Sinyalleri" || echo "Değişiklik yok, commit atlanıyor."
+        git commit -m "🤖 Otonom Güncelleme: Günlük Model Çıktıları" || echo "Değişiklik yok, commit atlanıyor."
         git pull --rebase
         git push
+
+    - name: 💬 Telegram Mesajı
+      run: python telegram_bildir.py ${{ steps.mod.outputs.mod }}
+
+    - name: 🚨 Hata Bildirimi
+      if: failure()
+      run: python telegram_bildir.py hata
