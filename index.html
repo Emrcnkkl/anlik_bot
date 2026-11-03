@@ -199,7 +199,7 @@
             <div class="portfolio-Allocation-badges">
                 <span class="alloc-badge" id="activePosBadge"><i class="bi bi-activity me-1 text-primary"></i> Aktif Trend: - Varlık</span>
                 <span class="alloc-badge" id="cashRatioBadge"><i class="bi bi-safe2 me-1 text-success"></i> PPF Nakit Kalkanı: %-</span>
-                <span class="alloc-badge" id="alphaWinBadge"><i class="bi bi-trophy me-1 text-warning"></i> Backtestte Al-Bekle'yi Yenen: -</span>
+                <span class="alloc-badge" id="killBadge"><i class="bi bi-shield-check me-1"></i> Kill-Switch: -</span> <span class="alloc-badge" id="alphaWinBadge"><i class="bi bi-trophy me-1 text-warning"></i> Backtestte Al-Bekle'yi Yenen: -</span>
             </div>
         </div>
 
@@ -284,6 +284,8 @@
                         <span class="stat-value" id="modalAlpha">-</span>
                     </div>
                     <div class="stat-box"><span class="stat-label">Out-of-sample: Algoritma vs Al-Bekle</span><span class="stat-value" id="modalOos">-</span></div>
+                    <div class="stat-box"><span class="stat-label">21 gösterge oylaması</span><span class="stat-value" id="modalOylama">-</span></div>
+                    <div class="stat-box"><span class="stat-label">Trend matrisi (1S · 4S · 1G · 1H)</span><span class="stat-value" id="modalMtf" style="font-size: 0.85rem;">-</span></div>
                     <div class="stat-box mb-0" style="border-color: rgba(59, 130, 246, 0.4); background-color: rgba(59, 130, 246, 0.05);">
                         <span class="stat-label" style="color: var(--accent);">Model Durumu</span>
                         <span class="stat-value" id="modalSinyal">AL</span>
@@ -297,7 +299,7 @@
     <div id="backtest" class="section-panel">
         <div class="text-center mb-4">
             <h2 class="header-title">Performans Analizi</h2>
-            <p class="header-subtitle">BIST100 + Gram Altın evreninde ADX filtreli ve ATR iz süren stoplu motorun backtest sonuçları. Parametreler aynı 500 günlük veride optimize edildiği için bunlar geçmişe uyarlanmış (in-sample) sonuçlardır ve canlı performansın göstergesi değildir. Evren bugünkü BIST100 listesidir (survivorship bias). Geçmişe uydurma etkisinden arındırılmış sonuç aşağıdaki out-of-sample bölümündedir.</p>
+            <p class="header-subtitle">BIST100 + Gram Altın evreninde ADX filtreli ve ATR iz süren stoplu motorun backtest sonuçları. Parametreler aynı 500 günlük veride optimize edildiği için bunlar geçmişe uyarlanmış (in-sample) sonuçlardır ve canlı performansın göstergesi değildir. Evren, son 60 günde en likit hisseler ve gram altındır (survivorship bias). Geçmişe uydurma etkisinden arındırılmış sonuç aşağıdaki out-of-sample bölümündedir.</p>
         </div>
 
         <div class="info-card mb-4" style="padding: 20px;">
@@ -415,11 +417,11 @@
         <div class="text-center mb-4"><h2 class="header-title">Metodoloji ve Sınırlılıklar</h2><p class="header-subtitle">Sayıların nasıl üretildiği ve nelerin modellenmediği.</p></div>
         <div class="info-card"><div class="desc-text mb-0">
             <p><strong>Veri.</strong> Günlük fiyatlar Yahoo Finance'ten alınır (gecikmeli veya hatalı olabilir). Gram altın, ons fiyatı × USD/TRY ÷ 31,1035 ile hesaplanır.</p>
-            <p><strong>İşlem varsayımları.</strong> Karar gün sonu kapanışıyla verilir, işlem ertesi gün açılış fiyatıyla yapılır. Her işlemde %0,2 komisyon ve %0,1 slipaj düşülür. Nakitte bekleyen bakiyeye günlük %0,11 PPF getirisi işlenir.</p>
-            <p><strong>Strateji seçimi.</strong> Her varlık için 15 indikatör ve 4 rejim ayarı (60 kombinasyon) denenir. Skor; Al-Bekle'yi yenmeye bonus, getiri ve düşük max drawdown üzerinden hesaplanır. Bu seçim geçmiş veride yapıldığı için 2 yıllık backtest sonuçları iyimserdir.</p>
+            <p><strong>İşlem varsayımları.</strong> Karar gün sonu kapanışıyla verilir, işlem ertesi gün açılış fiyatıyla yapılır. Her işlemde %0,2 komisyon ve %0,1 slipaj düşülür. Nakitte bekleyen bakiyeye günlük %0,11 PPF getirisi işlenir. Korumalar: stop sonrası 4 işlem günü yeniden giriş yasağı, açılış dünkü kapanışın %3,5+ altındaysa stop beklemeden çıkış, pozisyonda 3 günde %6 erimede 7 günlük devre kesici. Günlük %20+ veri sıçramaları ertesi gün geri dönüyorsa hatalı sayılıp onarılır. 1S/4S/1G/1H trend matrisi yalnızca göstergedir, işlem kararına girmez.</p>
+            <p><strong>Strateji seçimi.</strong> Her varlık için 18 aday (MACD, SuperTrend, EMA kesişimi, Donchian ve 21 göstergeli oylama) 4 rejim ayarıyla denenir (72 kombinasyon). Seçim: Al-Bekle'yi yenenler arasında en düşük max drawdown. Seçim yalnızca eğitim verisinde yapılır. Bu seçim geçmiş veride yapıldığı için 2 yıllık backtest sonuçları iyimserdir.</p>
             <p><strong>Out-of-sample.</strong> Her 63 işlem gününde strateji yalnızca önceki 250 günle seçilir ve sonraki 63 günde uygulanır. Bu sonuçlar geçmişe uydurma etkisinden büyük ölçüde arınmıştır, ancak yine de geçmiş veriye dayanır.</p>
             <p><strong>Canlı model portföy.</strong> İlk kayıt gününden itibaren eşit ağırlıklı ve 100.000 ₺ ile başlayan bir simülasyondur. İşlemler kaydedilir ve sonradan değiştirilmez. Gerçek para değildir.</p>
-            <p class="mb-0"><strong>Modellenmeyenler.</strong> Evren bugünkü BIST100 listesidir (survivorship bias). Likidite, tavan-taban, vergi, temettü ve bedelsiz işlemleri ayrıca modellenmemiştir. İçerik yatırım tavsiyesi değildir.</p>
+            <p class="mb-0"><strong>Modellenmeyenler.</strong> Evren, son 60 günde en likit hisseler ve gram altındır (survivorship bias). Likidite, tavan-taban, vergi, temettü ve bedelsiz işlemleri ayrıca modellenmemiştir. İçerik yatırım tavsiyesi değildir.</p>
         </div></div>
     </div>
 
@@ -690,6 +692,8 @@
         const oosEl = document.getElementById('modalOos');
         if (item.oos_getiri !== undefined) { oosEl.className = item.oos_getiri >= item.oos_bh ? 'stat-value stat-win' : 'stat-value stat-loss'; oosEl.innerText = `${item.oos_getiri >= 0 ? '+' : ''}%${item.oos_getiri} vs ${item.oos_bh >= 0 ? '+' : ''}%${item.oos_bh}`; }
         else { oosEl.className = 'stat-value text-white'; oosEl.innerText = '-'; }
+        const oy = item.oylama; document.getElementById('modalOylama').innerText = oy ? `${oy.etiket} (${oy.al} Al · ${oy.notr} Nötr · ${oy.sat} Sat)` : '-';
+        const mt = item.mtf; document.getElementById('modalMtf').innerText = mt ? ['1S', '4S', '1G', '1H'].map(x => `${x}: ${mt[x] ?? '-'}`).join(' · ') : '-';
         let sinyalSpan = document.getElementById('modalSinyal');
         if (item.sinyal === "AL") {
             sinyalSpan.className = "stat-value stat-win";
@@ -730,7 +734,7 @@
         }
 
         var options = {
-            series: [{ name: 'Algoritma · backtest (100 ₺ baz)', data: algoData }, { name: 'Evren Al-Bekle · 110 varlık, eşit ağırlık (100 ₺ baz)', data: bistData }],
+            series: [{ name: 'Algoritma · backtest (100 ₺ baz)', data: algoData }, { name: 'Evren Al-Bekle · eşit ağırlık (100 ₺ baz)', data: bistData }],
             chart: { type: 'area', height: 380, toolbar: { show: false }, fontFamily: 'Inter, sans-serif', background: 'transparent' },
             colors: ['#10b981', '#52525b'],
             fill: { type: ['gradient', 'solid'], gradient: { shadeIntensity: 1, opacityFrom: 0.4, opacityTo: 0.0, stops: [0, 100] } },
@@ -768,6 +772,11 @@
         document.getElementById('oosBadge').innerText = 'Son ' + o.gun + ' işlem günü';
         document.getElementById('oosWin').innerText = o.yenen_sayisi + ' / ' + o.liste.length + ' Varlık';
         document.getElementById('oosAvg').innerHTML = `<span class="${o.bist_ort >= 0 ? 'text-white' : 'stat-loss'}">${sg(o.bist_ort)}</span> <span style="color: var(--text-muted); font-weight:400;">|</span> <span class="${o.algo_ort >= 0 ? 'stat-win' : 'stat-loss'}">${sg(o.algo_ort)}</span>`;
+    }
+    function renderKill(p) {
+        const sg = p && p.saglik; if (!sg) return;
+        const renk = sg.durum === 'Sağlıklı' ? 'var(--green)' : sg.durum === 'Dikkat' ? '#f59e0b' : 'var(--red)';
+        document.getElementById('killBadge').innerHTML = `<i class="bi bi-shield-check me-1" style="color: ${renk};"></i> Kill-Switch: ${sg.durum} · DD %${sg.dd} · Kilitli: ${sg.kilitli}`;
     }
     function renderOosRisk(o) {
         const r = o && o.risk; if (!r || !r.algo || !r.bist) return;
@@ -825,6 +834,7 @@
             
             renderHistory(data.islem_gecmisi, data.islem_ozeti);
             renderLiveChart(data.canli);
+            renderKill(data.portfoy);
             renderPositions(data.pozisyonlar);
             filterTable();
             startOnboardingTour(false);

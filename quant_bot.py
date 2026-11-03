@@ -15,6 +15,13 @@ WF_EGITIM = 250   # walk-forward: strateji seçimi için geriye bakış (işlem 
 WF_TEST = 63      # walk-forward: seçilen stratejinin görmeden uygulandığı dönem
 HISTORY_DOSYASI = "history.json"
 SLIPAJ = 0.001    # her işlemde yön başına kayma varsayımı (binde 1)
+LIKIT_N = 30       # likit evren: son 60 günde ortalama TL hacmi en yüksek N hisse (+ Gram Altın)
+EVREN_MANUEL = None  # örn. ["AKBNK.IS", "ASELS.IS", ...] verirsen likidite sıralaması yerine bu liste kullanılır
+BAD_TICK_ESIK = 0.20                       # günlük %20 üzeri sıçrama şüpheli veri
+SOGUMA_GUN = 4                             # stop sonrası yeniden giriş yasağı (işlem günü)
+GAP_ESIK = 0.035                           # açılış dünkü kapanışın %3,5+ altındaysa acil çıkış
+KILL_PENCERE, KILL_ESIK, KILL_KILIT_GUN = 3, 0.06, 7   # 3 günde %6 erime -> 7 gün nakit kilidi
+OYLAMA_ESIKLERI = [(0.3, -0.1), (0.2, -0.2), (0.4, 0.0)]   # (giriş, çıkış) oy skoru eşikleri
 
 # Gram Altın + BIST100 Hisseleri
 bist100 = [
@@ -152,46 +159,127 @@ def ind_supertrend(df, period, multiplier):
     return trend, supertrend
 
 def backtest_gelismis_motor(fiyatlar, acilislar, durumlar, kalkanlar, atrler, adxler, baz_stoplar, adx_esik, atr_carpan, cikis_modu):
-    """Karar gün sonu kapanışıyla verilir, emir ERTESİ GÜN AÇILIŞINDA işlenir (aynı bar look-ahead yok).
-    cikis_modu 0: indikatör SAT veya ATR iz süren stop; 1: yalnızca ATR stop veya kalkan kırılımı."""
+    """Karar gün sonu kapanışıyla verilir, emir ERTESİ GÜN AÇILIŞINDA işlenir.
+    Korumalar: Gap çıkışı (stop beklemeden), stop sonrası soğuma kilidi, hisse bazlı Kill-Switch."""
     n = len(fiyatlar)
-    nakit, adet, zirve, giris_bakiye, emir = 100.0, 0.0, 0.0, 0.0, 0   # emir: 1 AL, -1 SAT (sonraki açılışta)
-    kazanan = toplam = 0
+    nakit, adet, zirve, giris_bakiye, emir = 100.0, 0.0, 0.0, 0.0, 0
+    kilit = kilit_sonra = 0   # kilit > 0: yeniden giriş yasak
+    kazanan = toplam = olay_gap = olay_kill = 0
     bakiye = np.full(n, 100.0); poz = np.zeros(n, dtype=int); stoplar = np.zeros(n)
     for i in range(n):
         ac = acilislar[i]
+        if adet > 0.0 and i > 0 and ac <= fiyatlar[i - 1] * (1.0 - GAP_ESIK):   # Gap koruması
+            emir, kilit_sonra = -1, SOGUMA_GUN; olay_gap += 1
         if emir == 1 and adet == 0.0:
             giris_bakiye, adet, nakit, zirve = nakit, nakit * (1.0 - KOMISYON) / (ac * (1.0 + SLIPAJ)), 0.0, ac
         elif emir == -1 and adet > 0.0:
             nakit, adet = adet * ac * (1.0 - SLIPAJ) * (1.0 - KOMISYON), 0.0
-            toplam += 1; kazanan += int(nakit > giris_bakiye)
-        emir = 0
+            toplam += 1; kazanan += int(nakit > giris_bakiye); kilit = kilit_sonra
+        emir = kilit_sonra = 0
         fiyat, kalkan, atr = fiyatlar[i], kalkanlar[i], atrler[i]
         if np.isnan(kalkan) or np.isnan(atr):
             bakiye[i] = nakit if adet == 0.0 else adet * fiyat
             poz[i] = int(adet > 0); continue
         if adet == 0.0:
-            nakit *= (1.0 + PPF_GUNLUK_GETIRI)
-            if durumlar[i] == 1 and fiyat > kalkan and adxler[i] >= adx_esik:
+            nakit *= (1.0 + PPF_GUNLUK_GETIRI); bakiye[i] = nakit
+            if kilit == 0 and durumlar[i] == 1 and fiyat > kalkan and adxler[i] >= adx_esik:
                 emir = 1
             stoplar[i] = kalkan
         else:
-            zirve = max(zirve, fiyat)
+            zirve = max(zirve, fiyat); bakiye[i] = adet * fiyat
             atr_stop = zirve - atr_carpan * atr
             stoplar[i] = max(kalkan * 0.98, atr_stop, baz_stoplar[i] if baz_stoplar[i] < fiyat else atr_stop)
-            cik = (durumlar[i] == -1 or fiyat < atr_stop) if cikis_modu == 0 else (fiyat < atr_stop or fiyat < kalkan)
-            if cik:
-                emir = -1
-        poz[i] = int(adet > 0)
-        bakiye[i] = nakit if adet == 0.0 else adet * fiyat
+            cik_stop = fiyat < atr_stop
+            cik = (durumlar[i] == -1 or cik_stop) if cikis_modu == 0 else (cik_stop or fiyat < kalkan)
+            if bakiye[i] <= bakiye[max(0, i - KILL_PENCERE):i + 1].max() * (1.0 - KILL_ESIK):   # Kill-Switch
+                emir, kilit_sonra = -1, KILL_KILIT_GUN; olay_kill += 1
+            elif cik:
+                emir, kilit_sonra = -1, (SOGUMA_GUN if cik_stop else 0)
+        poz[i] = int(adet > 0.0)
+        if kilit > 0 and adet == 0.0:
+            kilit -= 1
     son_deger = nakit if adet == 0.0 else adet * fiyatlar[-1] * (1.0 - KOMISYON)
     if adet > 0.0:
         toplam += 1; kazanan += int(son_deger > giris_bakiye)
     zirveler = np.maximum.accumulate(bakiye)
     max_dd = float(np.max((zirveler - bakiye) / np.maximum(zirveler, 1e-8)) * 100.0)
     return {"net_getiri": son_deger - 100.0, "max_dd": max_dd, "win_rate": (kazanan / toplam * 100.0) if toplam else 0.0,
-            "bakiye_serisi": bakiye, "pozisyon_serisi": poz, "stop_serisi": stoplar,
+            "bakiye_serisi": bakiye, "pozisyon_serisi": poz, "stop_serisi": stoplar, "gap": olay_gap, "kill": olay_kill,
             "hedef": int((adet > 0.0 and emir != -1) or emir == 1)}   # yarın açılışta hedef pozisyon
+
+def kirli_veri_temizle(df, ad):
+    """Günlük %20+ sıçrama ertesi gün geri dönüyorsa hatalı veri iğnesidir: onarılır. Kalıcıysa (bölünme/veri hatası) yalnızca uyarılır."""
+    c = df['Close'].values.copy(); duzeltilen = 0
+    for i in range(1, len(c)):
+        if abs(c[i] / c[i - 1] - 1.0) > BAD_TICK_ESIK:
+            if i + 1 < len(c) and abs(c[i + 1] / c[i - 1] - 1.0) < BAD_TICK_ESIK / 2:
+                for kol in ('Open', 'High', 'Low', 'Close'):
+                    df.iloc[i, df.columns.get_loc(kol)] = c[i - 1]
+                c[i] = c[i - 1]; duzeltilen += 1
+            else:
+                print(f"⚠️ {ad}: {df.index[i]:%d.%m.%Y} günlük sıçrama kalıcı (bölünme/veri hatası olabilir), düzeltilmedi.")
+    if duzeltilen:
+        print(f"🧹 {ad}: {duzeltilen} hatalı veri iğnesi onarıldı.")
+    return df
+
+def oylama_hesapla(df):
+    """Investing.com tarzı 21 gösterge: 9 osilatör + 12 hareketli ortalama. Her biri +1 (Al), -1 (Sat) veya 0 (Nötr) oy verir."""
+    c, h, l = df['Close'], df['High'], df['Low']
+    mv = lambda al, sat: np.where(al, 1, np.where(sat, -1, 0))
+    d = c.diff(); up = d.clip(lower=0).ewm(alpha=1/14, adjust=False).mean(); dn = (-d.clip(upper=0)).ewm(alpha=1/14, adjust=False).mean()
+    rsi = 100 - 100 / (1 + up / dn.replace(0, np.nan))
+    hh9, ll9 = h.rolling(9).max(), l.rolling(9).min()
+    stoch = (100 * (c - ll9) / (hh9 - ll9).replace(0, np.nan)).rolling(6).mean()
+    rmin, rmax = rsi.rolling(14).min(), rsi.rolling(14).max(); srsi = 100 * (rsi - rmin) / (rmax - rmin).replace(0, np.nan)
+    macd = c.ewm(span=12, adjust=False).mean() - c.ewm(span=26, adjust=False).mean(); sig = macd.ewm(span=9, adjust=False).mean()
+    tr = pd.concat([h - l, (h - c.shift()).abs(), (l - c.shift()).abs()], axis=1).max(axis=1); atr = tr.ewm(alpha=1/14, adjust=False).mean()
+    dh, dl = h.diff(), -l.diff()
+    pdi = 100 * dh.where((dh > dl) & (dh > 0), 0.0).ewm(alpha=1/14, adjust=False).mean() / atr
+    mdi = 100 * dl.where((dl > dh) & (dl > 0), 0.0).ewm(alpha=1/14, adjust=False).mean() / atr
+    adx = (100 * (pdi - mdi).abs() / (pdi + mdi).replace(0, np.nan)).ewm(alpha=1/14, adjust=False).mean()
+    hh14, ll14 = h.rolling(14).max(), l.rolling(14).min(); wr = -100 * (hh14 - c) / (hh14 - ll14).replace(0, np.nan)
+    tp = (h + l + c) / 3; sapma = tp.rolling(20).apply(lambda x: np.abs(x - x.mean()).mean(), raw=True)
+    cci = (tp - tp.rolling(20).mean()) / (0.015 * sapma.replace(0, np.nan))
+    e13 = c.ewm(span=13, adjust=False).mean(); bull, bear = h - e13, l - e13
+    oy = {"RSI": mv(rsi < 30, rsi > 70), "Stoch": mv(stoch < 20, stoch > 80), "StochRSI": mv(srsi < 20, srsi > 80), "MACD": mv(macd > sig, macd < sig),
+          "ADX": mv((adx > 25) & (pdi > mdi), (adx > 25) & (pdi < mdi)), "Williams": mv(wr < -80, wr > -20), "CCI": mv(cci < -100, cci > 100),
+          "ROC": mv(c.pct_change(12) > 0, c.pct_change(12) < 0),
+          "BullBear": mv((e13 > e13.shift()) & (bear < 0) & (bear > bear.shift()), (e13 < e13.shift()) & (bull > 0) & (bull < bull.shift()))}
+    for per in (5, 10, 20, 50, 100, 200):
+        sma = c.rolling(per).mean(); ema = c.ewm(span=per, adjust=False).mean()
+        oy[f"SMA{per}"] = mv(c > sma, c < sma); oy[f"EMA{per}"] = mv(c > ema, c < ema)
+    M = pd.DataFrame(oy, index=df.index)
+    return M.sum(axis=1) / float(M.shape[1]), M
+
+def oy_etiket(s):
+    return "Güçlü Al" if s >= 0.5 else "Al" if s >= 0.1 else "Güçlü Sat" if s <= -0.5 else "Sat" if s <= -0.1 else "Nötr"
+
+def ind_oylama(skor, g, c):
+    d = np.zeros(len(skor), dtype=int); cur = -1
+    for i, s in enumerate(skor):
+        cur = 1 if s >= g else -1 if s <= c else cur
+        d[i] = cur
+    return d
+
+def mtf_matrisi(gun, saat):
+    """Yalnızca GÖSTERGE: 1S/4S/1G/1H oylama etiketi (tamamlanmış son bar). İşlem kararına girmez."""
+    def etiket(d):
+        try:
+            if d is None or len(d) < 30: return None
+            return oy_etiket(float(oylama_hesapla(d)[0].iloc[-1]))
+        except Exception:
+            return None
+    ohlc = {'Open': 'first', 'High': 'max', 'Low': 'min', 'Close': 'last'}
+    hafta = gun[['Open', 'High', 'Low', 'Close']].resample('W-FRI').agg(ohlc).dropna()
+    s4 = saat.resample('4h').agg(ohlc).dropna() if saat is not None and len(saat) else None
+    return {"1S": etiket(saat), "4S": etiket(s4), "1G": etiket(gun), "1H": etiket(hafta)}
+
+def saglik_hesapla(seri, kasalar):
+    v = [x["deger"] for x in seri]; dd = (max(v) - v[-1]) / max(v) * 100.0 if v else 0.0
+    son3 = (v[-1] / v[-4] - 1.0) * 100.0 if len(v) >= 4 else 0.0
+    kilitli = sum(1 for k in kasalar.values() if k.get("kilit", 0) > 0)
+    durum = "Kritik" if dd >= 6.0 or son3 <= -KILL_ESIK * 100.0 else "Dikkat" if dd >= 3.0 or kilitli >= 0.2 * max(1, len(kasalar)) else "Sağlıklı"
+    return {"durum": durum, "dd": round(dd, 1), "son3": round(son3, 1), "kilitli": kilitli}
 
 macd_ayarlari = [(8, 21), (12, 26), (5, 35), (24, 52)]
 st_ayarlari = [(10, 2.0), (10, 3.0), (14, 2.5), (20, 2.0)]
@@ -210,7 +298,7 @@ def en_iyi_strateji(adaylar, k, s, e, fiy, acl, atr, adx):
     for ad in adaylar:
         for rej in rejim_kombinasyonlari:
             sn = calistir(ad, rej, k, s, e, fiy, acl, atr, adx)
-            skor = (5000.0 if sn["net_getiri"] - bh > 0 else 0.0) + sn["net_getiri"] - 0.45 * sn["max_dd"]
+            skor = (1000.0 - sn["max_dd"] + 1e-3 * sn["net_getiri"]) if sn["net_getiri"] > bh else sn["net_getiri"] - bh   # Al-Bekle'yi yenenler arasında en düşük max drawdown
             if skor > en_iyi:
                 en_iyi, secim = skor, (ad, rej, sn)
     return secim
@@ -237,30 +325,46 @@ def gecmis_yukle():
     except Exception:
         return {}
 
+def _sat(k, h, v, neden, olaylar):
+    satis = v["acilis"] * (1.0 - SLIPAJ)
+    g = round((satis / k["giris_fiyat"] - 1.0) * 100.0, 1) if k["giris_fiyat"] else None
+    k["nakit"] = k["adet"] * satis * (1.0 - KOMISYON); k["adet"] = 0.0
+    olaylar.append({"tarih": v["tarih"], "hisse": h, "islem": neden, "fiyat": round(v["acilis"], 2), "getiri": g, "strateji": v["strateji"]})
+
 def canli_kitabi_guncelle(gecmis, hedefler, veriler):
-    """İLERİYE DÖNÜK, DONDURULMUŞ kayıt: dünkü karar bugünün açılışında işlenir, geçmiş günler asla yeniden hesaplanmaz."""
+    """İLERİYE DÖNÜK, DONDURULMUŞ kayıt. Dünkü karar bugünün açılışında işlenir; geçmiş günler yeniden hesaplanmaz.
+    Canlı korumalar: Gap acil çıkışı, stop sonrası kilit, hisse bazlı Kill-Switch."""
     kitap = gecmis.setdefault("kitap", {}); kasalar = kitap.setdefault("kasalar", {}); olaylar = gecmis.setdefault("olaylar", [])
-    ilk = not kasalar; bekleyen = kitap.get("bekleyen", {}); pay = BASLANGIC_SERMAYE / max(1, len(veriler))
+    ilk = not kasalar; bekleyen = kitap.get("bekleyen", {}); pay = BASLANGIC_SERMAYE / max(1, len(veriler)); zorla_cik = set()
     for h, v in veriler.items():
         if not ilk and h not in kasalar:
             continue
-        k = kasalar.setdefault(h, {"nakit": pay, "adet": 0.0, "son_tarih": None, "giris_fiyat": None, "son_fiyat": v["kapanis"]})
+        k = kasalar.setdefault(h, {"nakit": pay, "adet": 0.0, "son_tarih": None, "giris_fiyat": None, "son_fiyat": v["kapanis"], "kilit": 0, "dg": []})
         if k["son_tarih"] is None:
             k["son_tarih"] = v["tarih"]
         elif v["tarih"] > k["son_tarih"]:
-            if bekleyen.get(h, 0) == 1 and k["adet"] == 0.0:
+            if k["adet"] > 0.0 and v["acilis"] <= k["son_fiyat"] * (1.0 - GAP_ESIK):
+                _sat(k, h, v, "Acil Çıkış (Gap)", olaylar); k["kilit"] = SOGUMA_GUN
+            elif bekleyen.get(h, 0) == 1 and k["adet"] == 0.0 and k.get("kilit", 0) == 0:
                 k["giris_fiyat"] = v["acilis"] * (1.0 + SLIPAJ); k["adet"] = k["nakit"] * (1.0 - KOMISYON) / k["giris_fiyat"]; k["nakit"] = 0.0
                 olaylar.append({"tarih": v["tarih"], "hisse": h, "islem": "Trend Girişi", "fiyat": round(v["acilis"], 2), "getiri": None, "strateji": v["strateji"]})
             elif bekleyen.get(h, 0) == 0 and k["adet"] > 0.0:
-                k["nakit"] = k["adet"] * v["acilis"] * (1.0 - SLIPAJ) * (1.0 - KOMISYON)
-                g = round((v["acilis"] * (1.0 - SLIPAJ) / k["giris_fiyat"] - 1.0) * 100.0, 1) if k["giris_fiyat"] else None
-                k["adet"] = 0.0
-                olaylar.append({"tarih": v["tarih"], "hisse": h, "islem": "Trend Çıkışı", "fiyat": round(v["acilis"], 2), "getiri": g, "strateji": v["strateji"]})
+                _sat(k, h, v, k.pop("neden", None) or "Trend Çıkışı", olaylar)
             if k["adet"] == 0.0:
                 k["nakit"] *= (1.0 + PPF_GUNLUK_GETIRI) ** max(1, v["yeni_bar"])
-            k["son_tarih"] = v["tarih"]
+            k["kilit"] = max(0, k.get("kilit", 0) - max(1, v["yeni_bar"])); k["son_tarih"] = v["tarih"]
         k["son_fiyat"] = v["kapanis"]
-    kitap["bekleyen"] = {**bekleyen, **{h: int(x) for h, x in hedefler.items()}}
+        dg = k.setdefault("dg", []); simdi = k["nakit"] + k["adet"] * v["kapanis"]
+        if k.get("dg_tarih") == v["tarih"] and dg: dg[-1] = simdi
+        else: dg.append(simdi); k["dg_tarih"] = v["tarih"]
+        del dg[:-(KILL_PENCERE + 1)]
+        if k["adet"] > 0.0 and dg[-1] <= max(dg) * (1.0 - KILL_ESIK):   # Kill-Switch: yarın açılışta çık, 7 gün nakitte kal
+            k["kilit"] = KILL_KILIT_GUN; k["neden"] = "Devre Kesici (Kill-Switch)"; zorla_cik.add(h)
+    yeni = {**bekleyen, **{h: int(x) for h, x in hedefler.items()}}
+    for h, k in kasalar.items():
+        if h in zorla_cik or k.get("kilit", 0) > 0:
+            yeni[h] = 0
+    kitap["bekleyen"] = yeni
     deger = sum(k["nakit"] + k["adet"] * k["son_fiyat"] for k in kasalar.values())
     bugun = max(k["son_tarih"] for k in kasalar.values())
     kitap.setdefault("baslangic", bugun)
@@ -275,11 +379,32 @@ gecmis = gecmis_yukle()
 kitap_son = {h: k.get("son_tarih") for h, k in gecmis.get("kitap", {}).get("kasalar", {}).items()}
 
 print("⏳ BIST100 ve Gram Altın Verileri İndiriliyor...")
+def sayi(x): return pd.to_numeric(x.squeeze())
+aday_hisseler = [h for h in bist100 if h != "GRAM_ALTIN"]
+evren = gecmis.get("evren")
+indir = aday_hisseler if evren is None else [h for h in evren if h != "GRAM_ALTIN"]
+toplu_veri = yf.download(indir + ["GC=F", "TRY=X", "XU100.IS"], period="3y", interval="1d", group_by='ticker', progress=False, threads=True)
+if evren is None:   # ilk çalışma: likit evreni seç ve DONDUR (history.json'a yazılır)
+    if EVREN_MANUEL:
+        secilen = list(EVREN_MANUEL)
+    else:
+        hacim = {}
+        for h in indir:
+            if h in toplu_veri.columns.levels[0]:
+                try: hacim[h] = float((sayi(toplu_veri[h]['Close']) * sayi(toplu_veri[h]['Volume'])).dropna().tail(60).mean())
+                except Exception: pass
+        secilen = sorted(hacim, key=hacim.get, reverse=True)[:LIKIT_N]
+    evren = secilen + ["GRAM_ALTIN"]; gecmis["evren"] = evren
+    print("🔎 Likit evren seçildi:", ", ".join(h.replace(".IS", "") for h in secilen))
+bist100 = evren
 normal_hisseler = [h for h in bist100 if h != "GRAM_ALTIN"]
-toplu_veri = yf.download(normal_hisseler + ["GC=F", "TRY=X", "XU100.IS"], period="3y", interval="1d", group_by='ticker', progress=False, threads=True)
 
 site_verileri, canli_veriler, hedefler = [], {}, {}
 stop_map, gram_close = {}, None
+try:   # 1S / 4S trend göstergeleri için saatlik veri (yalnızca görüntü amaçlı)
+    saatlik = yf.download(normal_hisseler, period="120d", interval="1h", group_by='ticker', progress=False, threads=True)
+except Exception:
+    saatlik = None
 is_egrileri, bh_egrileri, oos_algo_egrileri, oos_bh_egrileri = [], [], [], []
 perf2, perf6, perf_oos = [], [], []
 
@@ -301,6 +426,7 @@ for hisse in bist100:
                 df[c] = sayi(df[c])
             df['Open'] = df['Open'].fillna(df['Close'])
             df.dropna(subset=['Close', 'High', 'Low'], inplace=True)
+        df = kirli_veri_temizle(df, hisse)
         if len(df) < 250:
             continue
 
@@ -321,6 +447,12 @@ for hisse in bist100:
         for per in donchian_ayarlari:
             d, s = ind_donchian(test['High'], test['Low'], test['Close'], per); adaylar.append(("Donchian", f"K:{per}", d, s))
 
+        sk_s, M = oylama_hesapla(df); skor_s = sk_s.reindex(test.index).fillna(0.0).values
+        baz_alt = test['Low'].rolling(20).min().shift(1).fillna(0.0).values
+        for g_, c_ in OYLAMA_ESIKLERI:
+            adaylar.append(("Oylama", f"G:{g_}/Ç:{c_}", ind_oylama(skor_s, g_, c_), baz_alt))
+        oy_son = {"etiket": oy_etiket(float(sk_s.iloc[-1])), "skor": round(float(sk_s.iloc[-1]), 2), "al": int((M.iloc[-1] > 0).sum()),
+                  "sat": int((M.iloc[-1] < 0).sum()), "notr": int((M.iloc[-1] == 0).sum())}
         ad, rej, sonuc = en_iyi_strateji(adaylar, k, 0, n, fiy, acl, atr, adx)   # güncel şampiyon (in-sample)
         strateji = f"{ad[0]} ({ad[1]} • {'Trend' if rej[3] == 1 else 'ADX'})"
         bakiye = sonuc["bakiye_serisi"]; temiz = hisse.replace(".IS", "")
@@ -340,6 +472,9 @@ for hisse in bist100:
             "adx": round(float(adx[-1]), 1), "max_dd": round(sonuc["max_dd"], 1), "win_rate": round(sonuc["win_rate"], 1),
             "strateji": strateji, "stop": f"{round(st, 2)} ₺" if st > 0 else "Trend Çıkışı", "getiri": algo_2yil, "bh_getiri": bh_r,
             "alfa": round(algo_2yil - bh_r, 1), "gecmis": [round(float(x), 2) for x in fiy[-30:]], "tarihler": [d.strftime("%d.%m") for d in test.index[-30:]]})
+        try: sa = saatlik[hisse][['Open', 'High', 'Low', 'Close']].dropna() if (saatlik is not None and hisse in saatlik.columns.levels[0]) else None
+        except Exception: sa = None
+        site_verileri[-1].update({"oylama": oy_son, "mtf": mtf_matrisi(df, sa)})
         perf2.append({"hisse": temiz, "bh": bh_r, "algo": algo_2yil, "yendi": bool(algo_2yil > bh_r)})
         perf6.append({"hisse": temiz, "bh": bh_6, "algo": algo_6, "yendi": bool(algo_6 > bh_6)})
         is_egrileri.append(pd.Series(bakiye, index=test.index)); bh_egrileri.append(pd.Series(fiy / fiy[0] * 100.0, index=test.index))
@@ -357,10 +492,10 @@ for hisse in bist100:
 # İLERİYE DÖNÜK (dondurulmuş) model portföy
 beklenen = len(gecmis.get("kitap", {}).get("kasalar", {})) or len(bist100)
 if len(canli_veriler) < 0.7 * beklenen:
-    raise SystemExit(f"❌ Veri eksik ({len(canli_veriler)}/{beklenen} varlık). Dosyalar güncellenmedi.")
+    raise SystemExit(f"❌ Veri eksik veya evren değişti. history.json eski evrenle kalmışsa silip yeniden başlat ({len(canli_veriler)}/{beklenen} varlık). Dosyalar güncellenmedi.")
 kasalar, guncel = canli_kitabi_guncelle(gecmis, hedefler, canli_veriler)
 for d in site_verileri:
-    kz = kasalar.get(d["hisse"]); poz = bool(kz and kz["adet"] > 0); hdf = hedefler.get(d["hisse"], 0)
+    kz = kasalar.get(d["hisse"]); poz = bool(kz and kz["adet"] > 0); hdf = gecmis["kitap"]["bekleyen"].get(d["hisse"], hedefler.get(d["hisse"], 0))
     d["sinyal"] = "TUT" if poz and hdf else "SAT" if poz else "AL" if hdf else "İZLE"
 with open(HISTORY_DOSYASI, "w", encoding="utf-8") as f:
     json.dump(gecmis, f, ensure_ascii=False, indent=1)
@@ -410,7 +545,7 @@ pozisyonlar = sorted([{"hisse": h, "giris_tarih": son_giris.get(h, "-"), "giris_
                        "kz": round((kz["son_fiyat"] / kz["giris_fiyat"] - 1.0) * 100.0, 1), "stop": round(stop_map.get(h, 0.0), 2),
                        "stop_mesafe": round((kz["son_fiyat"] - stop_map[h]) / kz["son_fiyat"] * 100.0, 1) if stop_map.get(h, 0) > 0 else None}
                       for h, kz in kasalar.items() if kz["adet"] > 0 and kz["giris_fiyat"]], key=lambda x: -x["kz"])
-kapanan = [o["getiri"] for o in gecmis["olaylar"] if o["islem"] == "Trend Çıkışı" and o.get("getiri") is not None]
+kapanan = [o["getiri"] for o in gecmis["olaylar"] if o["islem"] != "Trend Girişi" and o.get("getiri") is not None]
 islem_ozeti = {"kapanan": len(kapanan), "kazanma_orani": round(100.0 * sum(1 for g in kapanan if g > 0) / len(kapanan), 1) if kapanan else None,
                "ort_getiri": round(float(np.mean(kapanan)), 1) if kapanan else None}
 
@@ -425,6 +560,7 @@ veri_paketi = {
     "performans": {"toplam_varlik": toplam, "alti_ay": ozet(perf6), "iki_yil": ozet(perf2), "oos": oos,
                    "grafik": egri_paketi(is_egrileri, bh_egrileri)},
     "sinyaller": site_verileri}
+veri_paketi["portfoy"]["saglik"] = saglik_hesapla(seri, kasalar)
 with open("signals.json", "w", encoding="utf-8") as f:
     json.dump(veri_paketi, f, ensure_ascii=False, indent=4)
 print(f"✅ {toplam} varlık analiz edildi | Backtest (in-sample) yenen: {veri_paketi['performans']['iki_yil']['yenen_sayisi']} | Out-of-sample yenen: {oos['yenen_sayisi']}/{len(perf_oos)}")
