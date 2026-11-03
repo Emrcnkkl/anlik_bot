@@ -8,7 +8,7 @@
     <!-- PWA MANIFEST -->
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon-192.png">
-    <meta name="description" content="QuantBIST: kural tabanlı algoritmik modelin BIST100 ve gram altın için günlük çıktıları. Yatırım tavsiyesi değildir.">
+    <meta name="description" content="QuantBIST: kural tabanlı algoritmik modelin likit hisseler ve gram altın için günlük çıktıları. Yatırım tavsiyesi değildir.">
     <meta name="theme-color" content="#09090b">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -206,8 +206,8 @@
         <div class="info-card mb-4" style="padding: 20px;"><h4 class="mb-3 px-2">Canlı model portföy eğrisi</h4><div id="liveChart" style="min-height: 300px;"></div></div>
 
         <!-- ARAMA VE FİLTRELEME (CHIPS) -->
-        <div class="filter-container" data-title="Akıllı Filtreleme" data-intro="BIST100 hisselerini saniyeler içinde tarayın. Arama kutusuna hisse adını yazabilir veya butonlarla filtreleyebilirsiniz.">
-            <input type="text" class="search-box" id="searchInput" placeholder="BIST100 hissesi ara..." onkeyup="filterTable()">
+        <div class="filter-container" data-title="Akıllı Filtreleme" data-intro="Hisseleri saniyeler içinde tarayın. Arama kutusuna hisse adını yazabilir veya butonlarla filtreleyebilirsiniz.">
+            <input type="text" class="search-box" id="searchInput" placeholder="Hisse ara..." onkeyup="filterTable()">
             <div class="filter-chips">
                 <div class="chip active" id="chip-ALL" onclick="setFilter('ALL')">Tümü</div>
                 <div class="chip" id="chip-AL" onclick="setFilter('AL')">Yeni Giriş</div>
@@ -299,7 +299,7 @@
     <div id="backtest" class="section-panel">
         <div class="text-center mb-4">
             <h2 class="header-title">Performans Analizi</h2>
-            <p class="header-subtitle">BIST100 + Gram Altın evreninde ADX filtreli ve ATR iz süren stoplu motorun backtest sonuçları. Parametreler aynı 500 günlük veride optimize edildiği için bunlar geçmişe uyarlanmış (in-sample) sonuçlardır ve canlı performansın göstergesi değildir. Evren, son 60 günde en likit hisseler ve gram altındır (survivorship bias). Geçmişe uydurma etkisinden arındırılmış sonuç aşağıdaki out-of-sample bölümündedir.</p>
+            <p class="header-subtitle">Likit hisse + Gram Altın evreninde ADX filtreli ve ATR iz süren stoplu motorun backtest sonuçları. Parametreler aynı 500 günlük veride optimize edildiği için bunlar geçmişe uyarlanmış (in-sample) sonuçlardır ve canlı performansın göstergesi değildir. Evren, son 60 günde en likit hisseler ve gram altındır (survivorship bias). Geçmişe uydurma etkisinden arındırılmış sonuç aşağıdaki out-of-sample bölümündedir.</p>
         </div>
 
         <div class="info-card mb-4" style="padding: 20px;">
@@ -353,7 +353,7 @@
                         <h4 class="mb-0" style="color: var(--accent);">Son 2 Yıl (Makro Vade)</h4>
                         <i class="bi bi-calendar-check fs-4" style="color: var(--text-muted);"></i>
                     </div>
-                    <p class="desc-text">Büyük boğa rallileri ve sert düzeltmeleri içeren 500 işlem gününde Alfa odaklı şampiyon stratejilerin tüm BIST100 performansı.</p>
+                    <p class="desc-text">Büyük boğa rallileri ve sert düzeltmeleri içeren 500 işlem gününde Alfa odaklı şampiyon stratejilerin tüm evrenin performansı.</p>
                     
                     <div class="stat-box">
                         <span class="stat-label">Al-Bekle'yi Yenme Başarısı</span>
@@ -409,7 +409,7 @@
                 <i class="bi bi-cpu info-icon mb-0 me-3"></i>
                 <h4 class="mb-0">Alfa & Max Drawdown Odaklı Grid Search</h4>
             </div>
-            <p class="desc-text mb-0">Her varlığın farklı bir volatilite DNA'sı vardır. Otonom motor her akşam BIST100 varlıklarını 60'tan fazla indikatör, ADX eşiği ve ATR stop kombinasyonuyla test eder; Al-Bekle (Buy & Hold) getirisini en düşük Max Drawdown ile yenen şampiyon stratejiyi seçer.</p>
+            <p class="desc-text mb-0">Her varlığın farklı bir volatilite DNA'sı vardır. Otonom motor her akşam evrendeki varlıkları 60'tan fazla indikatör, ADX eşiği ve ATR stop kombinasyonuyla test eder; Al-Bekle (Buy & Hold) getirisini en düşük Max Drawdown ile yenen şampiyon stratejiyi seçer.</p>
         </div>
     </div>
 
