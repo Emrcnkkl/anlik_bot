@@ -21,6 +21,7 @@ SLIPAJ = 0.001    # her işlemde yön başına kayma varsayımı (binde 1)
 LIKIT_N = int(os.environ.get("LIKIT_N", 30))   # likit evren: son 60 günde ortalama TL hacmi en yüksek N hisse (+ Gram Altın)
 PIYASA_FILTRE = os.environ.get("PIYASA_FILTRE", "kapali")   # kapali | giris (XU100 EMA200 altındayken yeni giriş yok) | cikis (ek olarak pozisyonlardan da çık)
 MOM_N, MOM_GUN = int(os.environ.get("MOM_N", 0)), int(os.environ.get("MOM_GUN", 126))   # MOM_N>0: yeni giriş yalnızca 126 günlük momentumu evrende ilk N içinde olan varlıklara
+NAKIT_VARLIK = os.environ.get("NAKIT_VARLIK", "nakit")   # nakit | altin (boştaki kasa PPF yerine gram altın getirisini alır; deney)
 NAKIT_CARPAN = 0.9   # nakit getirisi = politika faizi x 0,9 (mevduat/PPF net getirisi yaklaşımı)
 # TCMB 1 hafta vadeli repo (politika) faizi, YAKLAŞIK ve hafızadan; doğrulayıp düzelt. (yürürlük tarihi, yıllık %)
 POLITIKA_FAIZI = [("2020-12-24", 17.0), ("2021-03-18", 19.0), ("2021-09-23", 18.0), ("2021-10-21", 16.0), ("2021-11-18", 15.0), ("2021-12-16", 14.0),
@@ -29,6 +30,7 @@ POLITIKA_FAIZI = [("2020-12-24", 17.0), ("2021-03-18", 19.0), ("2021-09-23", 18.
                   ("2024-01-25", 45.0), ("2024-03-21", 50.0), ("2024-12-26", 47.5), ("2025-01-23", 45.0), ("2025-03-06", 42.5), ("2025-04-17", 46.0),
                   ("2025-07-24", 43.0), ("2025-09-11", 40.5), ("2025-10-23", 39.5), ("2025-12-11", 38.0), ("2026-01-22", 37.0), ("2026-10-22", 36.0)]
 EVREN_MANUEL = None  # örn. ["AKBNK.IS", "ASELS.IS", ...] verirsen likidite sıralaması yerine bu liste kullanılır
+LIMIT_ESIK = float(os.environ.get("LIMIT_ESIK", 0.095))   # BIST günlük fiyat sınırı ~%10: açılış tavan/tabandaysa alış/satış gerçekleşmez
 BAD_TICK_ESIK = 0.20                       # günlük %20 üzeri sıçrama şüpheli veri
 SOGUMA_GUN = int(os.environ.get("SOGUMA_GUN", 4))                             # stop sonrası yeniden giriş yasağı (işlem günü)
 GAP_ESIK = float(os.environ.get("GAP_ESIK", 0.035))                           # açılış dünkü kapanışın %3,5+ altındaysa acil çıkış
@@ -183,6 +185,8 @@ def nakit_gunluk(idx):
 def ek_diziler(idx, ad):
     """Pencereye hizalı ek diziler: nakit getirisi, piyasa rejimi (XU100 > EMA200), momentum sırası filtresi."""
     d = {"PPF": nakit_gunluk(idx)}; ix = _gun(idx)
+    if NAKIT_VARLIK == "altin" and GRAM_GETIRI is not None:
+        g = GRAM_GETIRI.reindex(ix).values; d["PPF"] = np.where(np.isnan(g), d["PPF"], g)
     if PIYASA_SERISI is not None: d["PIYASA"] = PIYASA_SERISI.reindex(ix, method="ffill").fillna(1).values
     if MOM_OK is not None and ad in MOM_OK.columns: d["MOM"] = MOM_OK[ad].reindex(ix, method="ffill").fillna(False).values.astype(bool)
     return d
@@ -199,12 +203,15 @@ def backtest_gelismis_motor(fiyatlar, acilislar, durumlar, kalkanlar, atrler, ad
         ac = acilislar[i]
         if adet > 0.0 and i > 0 and ac <= fiyatlar[i - 1] * (1.0 - GAP_ESIK):   # Gap koruması
             emir, kilit_sonra = -1, SOGUMA_GUN; olay_gap += 1
-        if emir == 1 and adet == 0.0:
+        yukari = i > 0 and ac >= fiyatlar[i - 1] * (1.0 + LIMIT_ESIK)   # tavan açılış: alış gerçekleşmez
+        asagi = i > 0 and ac <= fiyatlar[i - 1] * (1.0 - LIMIT_ESIK)    # taban açılış: satış gerçekleşmez
+        if emir == 1 and adet == 0.0 and not yukari:
             giris_bakiye, adet, nakit, zirve = nakit, nakit * (1.0 - KOMISYON) / (ac * (1.0 + SLIPAJ)), 0.0, ac
-        elif emir == -1 and adet > 0.0:
+        elif emir == -1 and adet > 0.0 and not asagi:
             nakit, adet = adet * ac * (1.0 - SLIPAJ) * (1.0 - KOMISYON), 0.0
             toplam += 1; kazanan += int(nakit > giris_bakiye); kilit = kilit_sonra
-        emir = kilit_sonra = 0
+        if not (emir == -1 and adet > 0.0):   # satış tabanda engellendiyse emir ertesi güne taşınır
+            emir = kilit_sonra = 0
         fiyat, kalkan, atr = fiyatlar[i], kalkanlar[i], atrler[i]
         if np.isnan(kalkan) or np.isnan(atr):
             bakiye[i] = nakit if adet == 0.0 else adet * fiyat
@@ -363,7 +370,7 @@ def walk_forward(adaylar, k, fiy, acl, atr, adx):
         ad, rej, _ = en_iyi_strateji(adaylar, k, s - WF_EGITIM, s, fiy, acl, atr, adx)
         sn = calistir(ad, rej, k, s, e, fiy, acl, atr, adx); seg = sn["bakiye_serisi"] / 100.0 * katsayi; maruz.extend(sn["pozisyon_serisi"].tolist()); islem += sn["islem"]; kaz += sn["kazanan"]
         egri.extend(seg.tolist()); katsayi = float(seg[-1]); s = e
-    return np.array(egri), (float(np.mean(maruz)) if maruz else 0.0), islem, kaz   # uzunluk n - WF_EGITIM, 1.0 = test başlangıcı
+    return np.array(egri), (float(np.mean(maruz)) if maruz else 0.0), islem, kaz, np.array(maruz)   # uzunluk n - WF_EGITIM, 1.0 = test başlangıcı
 
 AYLAR = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"]
 def tr_tarih(iso):
@@ -394,12 +401,12 @@ def canli_kitabi_guncelle(gecmis, hedefler, veriler):
         if k["son_tarih"] is None:
             k["son_tarih"] = v["tarih"]
         elif v["tarih"] > k["son_tarih"]:
-            if k["adet"] > 0.0 and v["acilis"] <= k["son_fiyat"] * (1.0 - GAP_ESIK):
+            if k["adet"] > 0.0 and k["son_fiyat"] * (1.0 - LIMIT_ESIK) < v["acilis"] <= k["son_fiyat"] * (1.0 - GAP_ESIK):
                 _sat(k, h, v, "Acil Çıkış (Gap)", olaylar); k["kilit"] = SOGUMA_GUN
-            elif bekleyen.get(h, 0) == 1 and k["adet"] == 0.0 and k.get("kilit", 0) == 0:
+            elif bekleyen.get(h, 0) == 1 and k["adet"] == 0.0 and k.get("kilit", 0) == 0 and v["acilis"] < k["son_fiyat"] * (1.0 + LIMIT_ESIK):
                 k["giris_fiyat"] = v["acilis"] * (1.0 + SLIPAJ); k["adet"] = k["nakit"] * (1.0 - KOMISYON) / k["giris_fiyat"]; k["nakit"] = 0.0
                 olaylar.append({"tarih": v["tarih"], "hisse": h, "islem": "Trend Girişi", "fiyat": round(v["acilis"], 2), "getiri": None, "strateji": v["strateji"]})
-            elif bekleyen.get(h, 0) == 0 and k["adet"] > 0.0:
+            elif bekleyen.get(h, 0) == 0 and k["adet"] > 0.0 and v["acilis"] > k["son_fiyat"] * (1.0 - LIMIT_ESIK):
                 _sat(k, h, v, k.pop("neden", None) or "Trend Çıkışı", olaylar)
             if k["adet"] == 0.0:
                 k["nakit"] *= (1.0 + PPF_GUNLUK_GETIRI) ** max(1, v["yeni_bar"])
@@ -465,6 +472,11 @@ if MOM_N > 0:
         kd["GRAM_ALTIN"] = _norm(gr_.iloc[:, 0] * gr_.iloc[:, 1] / 31.1034768)
     except Exception: pass
     MOM_OK = pd.DataFrame(kd).pct_change(MOM_GUN).rank(axis=1, ascending=False, method="min") <= MOM_N
+try:
+    gr0 = pd.concat([sayi(toplu_veri["GC=F"]['Close']), sayi(toplu_veri["TRY=X"]['Close'])], axis=1, join='inner').dropna()
+    GRAM_KAPANIS = _norm(gr0.iloc[:, 0] * gr0.iloc[:, 1] / 31.1034768); GRAM_GETIRI = GRAM_KAPANIS.pct_change()
+except Exception:
+    GRAM_KAPANIS = GRAM_GETIRI = None
 site_verileri, canli_veriler, hedefler = [], {}, {}
 stop_map, gram_close = {}, None
 try:   # 1S / 4S trend göstergeleri için saatlik veri (yalnızca görüntü amaçlı)
@@ -472,7 +484,7 @@ try:   # 1S / 4S trend göstergeleri için saatlik veri (yalnızca görüntü am
 except Exception:
     saatlik = None
 is_egrileri, bh_egrileri, oos_algo_egrileri, oos_bh_egrileri = [], [], [], []
-perf2, perf6, perf_oos, oos_maruz, oos_islem = [], [], [], [], []
+perf2, perf6, perf_oos, oos_maruz, oos_islem, oos_poz = [], [], [], [], [], []
 
 def sayi(x): return pd.to_numeric(x.squeeze())
 
@@ -549,7 +561,7 @@ for hisse in bist100:
         uzun = df.tail(WF_PENCERE).copy()
         if len(uzun) >= WF_EGITIM + 252:   # OUT-OF-SAMPLE: tüm geçmişte rolling walk-forward
             ad_u, k_u, fiy_u, acl_u, atr_u, adx_u = aday_olustur(uzun, sk_s, hisse.replace(".IS", ""))
-            egri, mz, isl, kaz = walk_forward(ad_u, k_u, fiy_u, acl_u, atr_u, adx_u); oos_maruz.append(mz); oos_islem.append((isl, kaz, len(egri)))
+            egri, mz, isl, kaz, pz = walk_forward(ad_u, k_u, fiy_u, acl_u, atr_u, adx_u); oos_maruz.append(mz); oos_islem.append((isl, kaz, len(egri))); oos_poz.append(pd.Series(pz, index=uzun.index[WF_EGITIM:]))
             idx = uzun.index[WF_EGITIM:]; bh_c = fiy_u[WF_EGITIM:] / fiy_u[WF_EGITIM - 1]
             oa, ob = round((egri[-1] - 1.0) * 100.0, 1), round((bh_c[-1] - 1.0) * 100.0, 1)
             perf_oos.append({"hisse": temiz, "bh": ob, "algo": oa, "yendi": bool(oa > ob)})
@@ -594,6 +606,38 @@ def oos_paketi(a, b):
     return {"tarihler": [d.strftime("%d.%m.%Y") for d in A.index], "algo": [round(float(x), 2) for x in A.values],
             "bist": [round(float(x), 2) for x in B.reindex(A.index).ffill().values], "nakit": [round(float(x), 2) for x in N]}, rf
 
+def hazirlik_hesapla(oos, seri, canli, oz):
+    """Gerçek paraya geçiş için kural tabanlı kapı. Eşikler yazarın seçimidir, değiştirilebilir; hepsi geçse bile yeterli değildir."""
+    ra = (oos.get("risk") or {}).get("algo") or {}; nk = oos.get("nakit_getiri")
+    nl = len(oos.get("liste", [])); yn = oos.get("yenen_sayisi", 0); gc = len(seri)
+    cg = (seri[-1]["deger"] / seri[0]["deger"] - 1.0) * 100.0 if gc > 1 else 0.0
+    cn = (canli["ppf"][-1] / canli["ppf"][0] - 1.0) * 100.0 if canli.get("ppf") and len(canli["ppf"]) > 1 else 0.0
+    dd = ra.get("max_dd"); sh = ra.get("sharpe"); kp = oz.get("kapanan", 0) or 0
+    k = [("Out-of-sample süresi", f"{oos.get('gun', 0)} gün", "≥ 500 gün", oos.get("gun", 0) >= 500),
+         ("OOS getiri nakdi geçiyor", f"%{ra.get('getiri')} vs %{nk}", "algoritma > nakit", bool(ra) and nk is not None and ra.get("getiri", -1e9) > nk),
+         ("OOS Sharpe (nakit üzeri)", str(sh), "≥ 0,5", sh is not None and sh >= 0.5),
+         ("OOS max drawdown", f"%{dd}", "≤ %20", dd is not None and dd <= 20),
+         ("OOS'ta Al-Bekle'yi yenen varlık oranı", f"{yn}/{nl}", "≥ %55", nl > 0 and yn / nl >= 0.55),
+         ("Canlı (ileriye dönük) kayıt süresi", f"{gc} gün", "≥ 120 gün", gc >= 120),
+         ("Canlı kayıt nakdi geçiyor", f"%{cg:.1f} vs %{cn:.1f}", "120+ günde algoritma > nakit", gc >= 120 and cg > cn),
+         ("Canlı kapanan işlem sayısı", str(kp), "≥ 30", kp >= 30)]
+    return {"gecen": sum(1 for x in k if x[3]), "toplam": len(k), "kriterler": [{"ad": a, "deger": d, "esik": e, "ok": bool(o)} for a, d, e, o in k]}
+
+def konsantre(algo, poz, tavan, rf):
+    """Aynı sinyallerle sermayeyi yalnızca pozisyondaki varlıklara eşit paylaştırır (varlık başına en fazla `tavan`); kalanı nakitte tutar."""
+    R = pd.concat([s / s.shift(1).fillna(100.0) - 1.0 for s in algo], axis=1)
+    Pv = np.nan_to_num(pd.concat(poz, axis=1).reindex(R.index).values); Rv = R.values
+    onceki = np.vstack([np.zeros((1, Pv.shape[1])), Pv[:-1]])
+    aktif = ((Pv == 1) | (onceki == 1)) & ~np.isnan(Rv); c = 100.0; cikti = []
+    for t in range(len(Rv)):
+        n = int(aktif[t].sum())
+        if n:
+            w = min(tavan, 1.0 / n); gelir = w * float(Rv[t][aktif[t]].sum()) + (1.0 - n * w) * rf[t]
+        else:
+            gelir = rf[t]
+        c *= 1.0 + gelir; cikti.append(c)
+    return cikti
+
 def egri_paketi(a, b):
     if not a: return {"tarihler": [], "algo": [], "bist": []}
     A = pd.concat(a, axis=1).ffill().bfill().mean(axis=1); B = pd.concat(b, axis=1).ffill().bfill().mean(axis=1)
@@ -612,6 +656,17 @@ seri = gecmis["deger_serisi"]
 oos = ozet(perf_oos); oos["grafik"], oos_rf = oos_paketi(oos_algo_egrileri, oos_bh_egrileri); oos["gun"] = len(oos["grafik"]["algo"])
 oos["risk"] = {"algo": risk(oos["grafik"]["algo"], oos_rf), "bist": risk(oos["grafik"]["bist"], oos_rf)}
 oos["nakit_getiri"] = round(oos["grafik"]["nakit"][-1] - 100.0, 1) if oos["gun"] else None
+oos["gram_getiri"] = None
+if GRAM_KAPANIS is not None and oos["gun"]:   # aynı dönemde gram altın Al-Bekle (altın rallisi mi, algoritma mı ayırt etmek için)
+    gk = GRAM_KAPANIS.reindex(_gun(pd.to_datetime(oos["grafik"]["tarihler"], format="%d.%m.%Y")), method="ffill")
+    oos["gram_getiri"] = round(float(gk.iloc[-1] / gk.iloc[0] - 1.0) * 100.0, 1)
+oos["konsantre"] = {}
+rf_bos = oos_rf   # boştaki payın getirisi: nakit (PPF) ya da altın varyantında gram altın
+if NAKIT_VARLIK == "altin" and GRAM_GETIRI is not None and oos["gun"]:
+    gg = GRAM_GETIRI.reindex(_gun(pd.to_datetime(oos["grafik"]["tarihler"], format="%d.%m.%Y"))).values; rf_bos = np.where(np.isnan(gg), oos_rf, gg)
+if oos_algo_egrileri and len(oos_poz) == len(oos_algo_egrileri):   # risk artırma analizi: aynı sinyaller, daha yoğun pozisyon
+    for ad_k, tv in (("taban 1/N (mevcut)", 1.0 / len(oos_algo_egrileri)), ("tavan %10", 0.10), ("tavan %20", 0.20)):
+        oos["konsantre"][ad_k] = risk(konsantre(oos_algo_egrileri, oos_poz, tv, rf_bos), oos_rf)
 
 tarihler_c = [x["tarih"] for x in seri]; bas = gecmis["kitap"]["baslangic"]
 try: xu = sayi(toplu_veri["XU100.IS"]['Close'])
@@ -639,6 +694,7 @@ veri_paketi = {
                    "grafik": egri_paketi(is_egrileri, bh_egrileri)},
     "sinyaller": site_verileri}
 veri_paketi["portfoy"]["saglik"] = saglik_hesapla(seri, kasalar)
+veri_paketi["hazirlik"] = hazirlik_hesapla(oos, seri, canli_paket, islem_ozeti)
 with open(os.environ.get("SIGNALS_DOSYASI", "signals.json"), "w", encoding="utf-8") as f:
     json.dump(veri_paketi, f, ensure_ascii=False, indent=4)
 print(f"✅ {toplam} varlık analiz edildi | Backtest (in-sample) yenen: {veri_paketi['performans']['iki_yil']['yenen_sayisi']} | Out-of-sample yenen: {oos['yenen_sayisi']}/{len(perf_oos)}")
@@ -647,3 +703,7 @@ print(f"DENEY | {os.environ.get('DENEY_ADI', 'varsayilan')} | OOS gün {oos['gun
 if oos_islem:
     ti, tk, tn = (sum(x[j] for x in oos_islem) for j in range(3))
     print(f"DENEY+ | {os.environ.get('DENEY_ADI', 'varsayilan')} | OOS hisse {len(oos_islem)} | işlem/hisse/yıl {ti / (tn / 252):.1f} | işlem kazanma %{100 * tk / max(1, ti):.0f}")
+_ad = os.environ.get('DENEY_ADI', 'varsayilan')
+if oos.get("gram_getiri") is not None: print(f"DENEY++ | {_ad} | gram altın Al-Bekle %{oos['gram_getiri']} (aynı dönem)")
+for _k, _v in (oos.get("konsantre") or {}).items():
+    if _v: print(f"DENEY++ | {_ad} | pozisyon yoğunlaştırma {_k} | algo %{_v.get('getiri')} | Sharpe {_v.get('sharpe')} | maxDD %{_v.get('max_dd')}")

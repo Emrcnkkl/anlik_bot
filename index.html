@@ -418,6 +418,9 @@
 
     <div id="method" class="section-panel">
         <div class="text-center mb-4"><h2 class="header-title">Metodoloji ve Sınırlılıklar</h2><p class="header-subtitle">Sayıların nasıl üretildiği ve nelerin modellenmediği.</p></div>
+        <div class="info-card mb-4" style="padding: 20px;"><div class="d-flex justify-content-between align-items-center px-2 mb-2 flex-wrap gap-2"><h4 class="mb-0">Gerçek para hazırlık kontrol listesi</h4><span class="badge" style="background-color: rgba(255,255,255,0.05); border: 1px solid var(--border);" id="hazirlikOzet">-</span></div>
+            <p class="desc-text px-2" style="font-size: 0.85rem;">Modelin kendi ölçütlerine göre kural tabanlı kontrol. Tüm kriterler geçse bile gerçek para için yeterli değildir ve yatırım tavsiyesi değildir.</p>
+            <div class="table-responsive"><table class="custom-table"><thead><tr><th></th><th>Kriter</th><th>Değer</th><th>Eşik</th></tr></thead><tbody id="hazirlikBody"><tr><td colspan="4" class="text-center py-3 text-muted">Veri bekleniyor.</td></tr></tbody></table></div></div>
         <div class="info-card"><div class="desc-text mb-0">
             <p><strong>Veri.</strong> Günlük fiyatlar Yahoo Finance'ten alınır (gecikmeli veya hatalı olabilir). Gram altın, ons fiyatı × USD/TRY ÷ 31,1035 ile hesaplanır.</p>
             <p><strong>İşlem varsayımları.</strong> Karar gün sonu kapanışıyla verilir, işlem ertesi gün açılış fiyatıyla yapılır. Her işlemde %0,2 komisyon ve %0,1 slipaj düşülür. Nakitte bekleyen bakiyeye, TCMB politika faizinin %90'ı kadar (yaklaşık, tarihsel tabloya göre) nakit getirisi işlenir. Korumalar: stop sonrası 4 işlem günü yeniden giriş yasağı, açılış dünkü kapanışın %3,5+ altındaysa stop beklemeden çıkış, pozisyonda 3 günde %6 erimede 7 günlük devre kesici. Günlük %20+ veri sıçramaları ertesi gün geri dönüyorsa hatalı sayılıp onarılır. 1S/4S/1G/1H trend matrisi yalnızca göstergedir, işlem kararına girmez.</p>
@@ -778,6 +781,11 @@
         document.getElementById('oosWin').innerText = o.yenen_sayisi + ' / ' + o.liste.length + ' Varlık';
         document.getElementById('oosAvg').innerHTML = `<span class="${o.bist_ort >= 0 ? 'text-white' : 'stat-loss'}">${sg(o.bist_ort)}</span> <span style="color: var(--text-muted); font-weight:400;">|</span> <span class="${o.algo_ort >= 0 ? 'stat-win' : 'stat-loss'}">${sg(o.algo_ort)}</span>`;
     }
+    function renderHazirlik(h) {
+        const el = document.getElementById('hazirlikBody'); if (!el || !h || !h.kriterler) return;
+        document.getElementById('hazirlikOzet').innerText = `${h.gecen} / ${h.toplam} kriter geçti`;
+        el.innerHTML = h.kriterler.map(k => `<tr><td style="font-weight: 700; color: var(${k.ok ? '--green' : '--red'});">${k.ok ? '✓' : '✗'}</td><td>${esc(k.ad)}</td><td class="font-mono">${esc(k.deger)}</td><td style="color: var(--text-muted);">${esc(k.esik)}</td></tr>`).join('');
+    }
     function renderGenislik(list) {
         const el = document.getElementById('genislik'); if (!el || !list || !list.length) return;
         const ust = list.filter(d => d.fiyat > d.ema200).length;
@@ -850,6 +858,7 @@
             renderLiveChart(data.canli);
             renderKill(data.portfoy);
             renderGenislik(data.sinyaller);
+            renderHazirlik(data.hazirlik);
             renderPositions(data.pozisyonlar);
             filterTable();
             startOnboardingTour(false);
