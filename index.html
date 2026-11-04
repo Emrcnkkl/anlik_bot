@@ -269,7 +269,7 @@
                         <span class="stat-value text-white" id="modalFiyat">0.00 ₺</span>
                     </div>
                     <div class="stat-box">
-                        <span class="stat-label">EMA 200 & ADX Trend Gücü</span>
+                        <span class="stat-label">Trend Kalkanı & ADX Eşiği</span>
                         <span class="stat-value" style="color: #a1a1aa;" id="modalEma">Hesaplanıyor...</span>
                     </div>
                     <div class="stat-box">
@@ -287,7 +287,7 @@
                     <div class="stat-box"><span class="stat-label">Out-of-sample: Algoritma vs Al-Bekle</span><span class="stat-value" id="modalOos">-</span></div>
                     <div class="stat-box"><span class="stat-label">21 gösterge oylaması</span><span class="stat-value" id="modalOylama">-</span></div>
                     <div class="stat-box"><span class="stat-label">Trend matrisi (1S · 4S · 1G · 1H)</span><span class="stat-value" id="modalMtf" style="font-size: 0.85rem;">-</span></div>
-                    <div class="stat-box"><span class="stat-label">Olası neden (Nötr ise)</span><span class="stat-value" id="modalNeden" style="font-size: 0.85rem;">-</span></div>
+                    <div class="stat-box"><span class="stat-label">Sinyal nedeni / giriş engeli</span><span class="stat-value" id="modalNeden" style="font-size: 0.85rem;">-</span></div>
                     <div class="stat-box mb-0" style="border-color: rgba(59, 130, 246, 0.4); background-color: rgba(59, 130, 246, 0.05);">
                         <span class="stat-label" style="color: var(--accent);">Model Durumu</span>
                         <span class="stat-value" id="modalSinyal">AL</span>
@@ -673,9 +673,9 @@
         document.getElementById('modalFiyat').innerText = item.fiyat + " ₺";
         document.getElementById('modalStrateji').innerText = item.strateji;
         
-        if (item.ema200) {
-            const adxText = item.adx ? ` | ADX: ${item.adx}` : '';
-            document.getElementById('modalEma').innerText = `${item.ema200} ₺${adxText}`;
+        if (item.kalkan) {
+            const adxText = item.adx !== undefined ? ` | ADX: ${item.adx} / eşik ${item.adx_esik}` : '';
+            document.getElementById('modalEma').innerText = `${item.kalkan_tipi}: ${item.kalkan} ₺${adxText}`;
         } else {
             document.getElementById('modalEma').innerText = "Veri Bekleniyor...";
         }
@@ -700,8 +700,7 @@
         else { oosEl.className = 'stat-value text-white'; oosEl.innerText = '-'; }
         const oy = item.oylama; document.getElementById('modalOylama').innerText = oy ? `${oy.etiket} (${oy.al} Al · ${oy.notr} Nötr · ${oy.sat} Sat)` : '-';
         const mt = item.mtf; document.getElementById('modalMtf').innerText = mt ? ['1S', '4S', '1G', '1H'].map(x => `${x}: ${mt[x] ?? '-'}`).join(' · ') : '-';
-        const stN = parseFloat(item.stop);
-        document.getElementById('modalNeden').innerText = item.sinyal !== 'İZLE' ? '-' : (!isNaN(stN) && item.fiyat < stN) ? `Fiyat trend kalkanının altında (kalkan ${stN}, fark %${((item.fiyat / stN - 1) * 100).toFixed(1)})` : `Kalkanın üstünde. ADX ${item.adx} veya stratejinin sinyali yetersiz`;
+        document.getElementById('modalNeden').innerText = item.sinyal_nedeni || item.giris_engelleri?.join(' · ') || '-';
         let sinyalSpan = document.getElementById('modalSinyal');
         if (item.sinyal === "AL") {
             sinyalSpan.className = "stat-value stat-win";

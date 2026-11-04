@@ -28,6 +28,14 @@ def mesaj(mod):
     fon = (f"Model portföy (simülasyon): {tl(p['guncel_bakiye'])} (%{p['net_kar_yuzde']:+.2f}) · Açık pozisyon: {p.get('aktif_pozisyon', 0)}/{p.get('toplam_varlik', 0)}"
            f" · Kill-Switch: {sg.get('durum', '-')}") if p else "Model portföy verisi yok."
     fon += f"\nPiyasa genişliği: {gen}/{len(sig)} varlık EMA200 üzerinde"
+    so = s.get("sinyal_ozeti", {})
+    if so:
+        ds = so.get("durumlar", {})
+        fon += f"\nSinyal durumu: AL {ds.get('AL', 0)} · TUT {ds.get('TUT', 0)} · SAT {ds.get('SAT', 0)} · İZLE {ds.get('İZLE', 0)}"
+        if not giris:
+            engeller = so.get("giris_engelleri", {})
+            if engeller:
+                fon += "\nYeni AL yok; en sık giriş engelleri: " + ", ".join(f"{neden} ({adet})" for neden, adet in list(engeller.items())[:3])
     hz = s.get("hazirlik")
     if hz: fon += f"\nGerçek para hazırlık kriterleri: {hz['gecen']}/{hz['toplam']} (modelin kendi ölçütleri)"
     uyari = ""

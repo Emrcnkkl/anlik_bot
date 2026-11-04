@@ -240,9 +240,10 @@ def backtest_gelismis_motor(fiyatlar, acilislar, durumlar, kalkanlar, atrler, ad
         toplam += 1; kazanan += int(son_deger > giris_bakiye)
     zirveler = np.maximum.accumulate(bakiye)
     max_dd = float(np.max((zirveler - bakiye) / np.maximum(zirveler, 1e-8)) * 100.0)
+    hedef = int((adet > 0.0 and emir != -1) or emir == 1)
     return {"net_getiri": son_deger - 100.0, "max_dd": max_dd, "win_rate": (kazanan / toplam * 100.0) if toplam else 0.0,
             "islem": toplam, "kazanan": kazanan, "bakiye_serisi": bakiye, "pozisyon_serisi": poz, "stop_serisi": stoplar, "gap": olay_gap, "kill": olay_kill,
-            "hedef": int((adet > 0.0 and emir != -1) or emir == 1)}   # yarın açılışta hedef pozisyon
+            "hedef": hedef, "kilit_kalan": int(kilit), "bekleyen_emir": int(emir)}   # yarın açılışta hedef pozisyon
 
 def kirli_veri_temizle(df, ad):
     """Günlük %20+ sıçrama ertesi gün geri dönüyorsa hatalı veri iğnesidir: onarılır. Kalıcıysa (bölünme/veri hatası) yalnızca uyarılır."""
@@ -534,6 +535,26 @@ for hisse in bist100:
                   "sat": int((M.iloc[-1] < 0).sum()), "notr": int((M.iloc[-1] == 0).sum())}
         ad, rej, sonuc = en_iyi_strateji(adaylar, k, 0, n, fiy, acl, atr, adx)   # güncel şampiyon (in-sample)
         strateji = f"{ad[0]} ({ad[1]} • {'Trend' if rej[3] == 1 else 'ADX'})"
+        giris_engelleri = []
+        if not sonuc["hedef"]:
+            if sonuc["bekleyen_emir"] == -1:
+                giris_engelleri.append("Çıkış emri bekliyor")
+            else:
+                if sonuc["kilit_kalan"] > 0:
+                    giris_engelleri.append(f"Soğuma/devre kesici kilidi: {sonuc['kilit_kalan']} gün")
+                if ad[2][-1] != 1:
+                    giris_engelleri.append("Seçilen strateji AL yönünde değil")
+                kalkan = float(k[rej[0]][-1])
+                if np.isfinite(kalkan) and fiy[-1] <= kalkan:
+                    giris_engelleri.append(f"Fiyat {rej[0]} kalkanının altında")
+                if np.isfinite(adx[-1]) and adx[-1] < rej[1]:
+                    giris_engelleri.append(f"ADX {adx[-1]:.1f}, gerekli eşik {rej[1]:.0f}")
+                if "PIYASA" in k and PIYASA_FILTRE != "kapali" and k["PIYASA"][-1] != 1:
+                    giris_engelleri.append("XU100 piyasa filtresi kapalı")
+                if "MOM" in k and not k["MOM"][-1]:
+                    giris_engelleri.append("Momentum sıralama filtresi dışında")
+                if not giris_engelleri:
+                    giris_engelleri.append("Giriş koşulları oluşmadı; motor durumu incelenmeli")
         bakiye = sonuc["bakiye_serisi"]; temiz = hisse.replace(".IS", "")
         hedefler[temiz] = sonuc["hedef"]
 
@@ -549,7 +570,8 @@ for hisse in bist100:
         site_verileri.append({
             "hisse": temiz, "sinyal": "İZLE", "fiyat": round(float(fiy[-1]), 2), "ema200": round(float(k["EMA200"][-1]), 2),
             "adx": round(float(adx[-1]), 1), "max_dd": round(sonuc["max_dd"], 1), "win_rate": round(sonuc["win_rate"], 1),
-            "strateji": strateji, "stop": f"{round(st, 2)} ₺" if st > 0 else "Trend Çıkışı", "getiri": algo_2yil, "bh_getiri": bh_r,
+            "strateji": strateji, "giris_engelleri": giris_engelleri, "kalkan_tipi": rej[0], "kalkan": round(float(k[rej[0]][-1]), 2), "adx_esik": rej[1],
+            "stop": f"{round(st, 2)} ₺" if st > 0 else "Trend Çıkışı", "getiri": algo_2yil, "bh_getiri": bh_r,
             "alfa": round(algo_2yil - bh_r, 1), "gecmis": [round(float(x), 2) for x in fiy[-30:]], "tarihler": [d.strftime("%d.%m") for d in test.index[-30:]]})
         try: sa = saatlik[hisse][['Open', 'High', 'Low', 'Close']].dropna() if (saatlik is not None and hisse in saatlik.columns.levels[0]) else None
         except Exception: sa = None
@@ -578,6 +600,15 @@ kasalar, guncel = canli_kitabi_guncelle(gecmis, hedefler, canli_veriler)
 for d in site_verileri:
     kz = kasalar.get(d["hisse"]); poz = bool(kz and kz["adet"] > 0); hdf = gecmis["kitap"]["bekleyen"].get(d["hisse"], hedefler.get(d["hisse"], 0))
     d["sinyal"] = "TUT" if poz and hdf else "SAT" if poz else "AL" if hdf else "İZLE"
+    if d["sinyal"] == "AL": d["sinyal_nedeni"] = "Bir sonraki açılış için giriş emri sırada"
+    elif d["sinyal"] == "TUT": d["sinyal_nedeni"] = "Model pozisyonda kalıyor"
+    elif d["sinyal"] == "SAT": d["sinyal_nedeni"] = "Bir sonraki açılış için çıkış emri sırada"
+    else:
+        engeller = list(d.get("giris_engelleri", []))
+        if kz and kz.get("kilit", 0) > 0:
+            engeller.insert(0, f"Canlı model kitabı kilidi: {kz['kilit']} gün")
+        d["giris_engelleri"] = engeller
+        d["sinyal_nedeni"] = "; ".join(engeller) or "Giriş koşulu oluşmadı"
 with open(HISTORY_DOSYASI, "w", encoding="utf-8") as f:
     json.dump(gecmis, f, ensure_ascii=False, indent=1)
 
@@ -693,6 +724,12 @@ veri_paketi = {
     "performans": {"toplam_varlik": toplam, "alti_ay": ozet(perf6), "iki_yil": ozet(perf2), "oos": oos,
                    "grafik": egri_paketi(is_egrileri, bh_egrileri)},
     "sinyaller": site_verileri}
+durum_sayilari = {etiket: sum(1 for d in site_verileri if d.get("sinyal") == etiket) for etiket in ("AL", "TUT", "SAT", "İZLE")}
+engel_sayilari = {}
+for d in site_verileri:
+    if d.get("sinyal") == "İZLE":
+        for neden in d.get("giris_engelleri", []): engel_sayilari[neden] = engel_sayilari.get(neden, 0) + 1
+veri_paketi["sinyal_ozeti"] = {"durumlar": durum_sayilari, "giris_engelleri": dict(sorted(engel_sayilari.items(), key=lambda x: -x[1])[:5])}
 veri_paketi["portfoy"]["saglik"] = saglik_hesapla(seri, kasalar)
 veri_paketi["hazirlik"] = hazirlik_hesapla(oos, seri, canli_paket, islem_ozeti)
 with open(os.environ.get("SIGNALS_DOSYASI", "signals.json"), "w", encoding="utf-8") as f:
