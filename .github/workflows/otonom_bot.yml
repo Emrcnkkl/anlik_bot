@@ -10,7 +10,7 @@ on:
       mod:
         description: 'Çalışma modu'
         type: choice
-        options: [aksam, sabah, deney]
+        options: [aksam, sabah, deney, deney-uzun]
         default: aksam
 
 # Aynı anda iki çalışma history.json dosyasını ezmesin
@@ -21,7 +21,7 @@ concurrency:
 jobs:
   analiz-yap:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 120
     permissions:
       contents: write
     env:
@@ -69,11 +69,11 @@ jobs:
         git push
 
     - name: 🧪 Deney (varyant karşılaştırması)
-      if: steps.mod.outputs.mod == 'deney'
-      run: bash deney.sh
+      if: startsWith(steps.mod.outputs.mod, 'deney')
+      run: bash deney.sh ${{ steps.mod.outputs.mod == 'deney-uzun' && 'uzun' || 'kisa' }}
 
     - name: 💬 Telegram Mesajı
-      if: steps.mod.outputs.mod != 'deney'
+      if: ${{ !startsWith(steps.mod.outputs.mod, 'deney') }}
       run: python telegram_bildir.py ${{ steps.mod.outputs.mod }}
 
     - name: 🚨 Hata Bildirimi
